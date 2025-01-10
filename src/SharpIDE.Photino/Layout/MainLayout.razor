@@ -9,13 +9,9 @@
 	<MudAppBar Dense="true">
 		<MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
 	</MudAppBar>
-	<MudDrawer @bind-Open="@_drawerOpen">
-		<MudDrawerHeader>
-			<MudStack Row="false" Justify="Justify.Center">
-				<MudText Typo="Typo.h5">SharpIDE.Photino</MudText>
-			</MudStack>
-		</MudDrawerHeader>
-		<NavMenu/>
+	<MudDrawer @bind-Open="@_drawerOpen" ClipMode="DrawerClipMode.Always">
+		<SolutionExplorer />
+		@* <NavMenu/> *@
 	</MudDrawer>
 	<MudMainContent>
 		<MudContainer Class="px-8 py-6">

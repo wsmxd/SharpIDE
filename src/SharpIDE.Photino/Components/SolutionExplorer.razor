@@ -1,0 +1,80 @@
+﻿@using Microsoft.Build.Construction
+@using SharpIDE.Application.Features.SolutionDiscovery
+
+@if (_solutionFile is null)
+{
+	return;
+}
+
+<MudTreeView T="ProjectInSolution" Dense="true">
+	@foreach(var project in _rootNodes)
+	{
+		@GetProjectFragment(project)
+	}
+</MudTreeView>
+
+
+@code {
+
+	private SolutionFile _solutionFile = null!;
+	private List<ProjectInSolution> _rootNodes = [];
+	private Dictionary<string, Folder> _folders = new();
+
+	private RenderFragment GetProjectFragment(ProjectInSolution project) =>
+		@<text>
+			 <MudTreeViewItem Value="project" Text="@project.ProjectName">
+				 @foreach(var child in _solutionFile.ProjectsByGuid.Values.Where(s => s.ParentProjectGuid == project.ProjectGuid).OrderBy(s => s.ProjectName))
+				 {
+					 @GetProjectFragment(child)
+				 }
+				 @if (_folders.GetValueOrDefault(project.ProjectGuid, null) is {} value)
+				 {
+					 @GetFolderFragment(value)
+				 }
+			 </MudTreeViewItem>
+	</text>;
+
+	private RenderFragment GetFolderFragment(Folder folder) =>
+		@<text>
+			 @foreach (var subFolder in folder.Folders)
+			 {
+				 <MudTreeViewItem @bind-Expanded="subFolder.Expanded" T="ProjectInSolution" Text="@subFolder.Name">
+					 @if (subFolder.Expanded)
+					 {
+						 @GetFolderFragment(subFolder)
+					 }
+				 </MudTreeViewItem>
+			 }
+			 @foreach (var file in folder.Files)
+			 {
+				 <MudTreeViewItem T="ProjectInSolution" Text="@file.Name" />
+			 }
+	</text>;
+
+	protected override async Task OnInitializedAsync()
+	{
+		var solutionFile = GetNodesInSolution.ParseSolutionFileFromPath("D:/matth/Documents/Git/amazon/ClientPortal.sln");
+		ArgumentNullException.ThrowIfNull(solutionFile);
+		_solutionFile = solutionFile;
+		var rootNodes = solutionFile.ProjectsByGuid.Values.Where(p => p.ParentProjectGuid == null).OrderBy(s => s.ProjectName).ToList();
+		_rootNodes = rootNodes;
+
+		var folders2 = _solutionFile.ProjectsByGuid.Values
+			.Where(s => s.ProjectType == SolutionProjectType.KnownToBeMSBuildFormat)
+			//.Take(2)
+			.Select(s =>
+			{
+				var rootFolder = new Folder
+				{
+					Name = Path.GetFileNameWithoutExtension(s.AbsolutePath),
+					Path = Path.GetDirectoryName(s.AbsolutePath)!,
+					IsPseudoFolder = false
+				};
+				rootFolder.Folders = rootFolder.GetSubFolders();
+				return (s, rootFolder);
+			})
+			.ToDictionary(s => s.s.ProjectGuid, s => s.Item2);
+		_folders = folders2;
+	}
+
+}

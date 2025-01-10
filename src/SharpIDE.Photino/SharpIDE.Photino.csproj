@@ -19,7 +19,7 @@
 	<ItemGroup>
 		<PackageReference Include="Microsoft.AspNetCore.Components" Version="9.0.0" />
 		<PackageReference Include="Microsoft.AspNetCore.Components.WebView" Version="9.0.0" />
-		<PackageReference Include="MudBlazor" Version="8.0.0-preview.5" />
+		<PackageReference Include="MudBlazor" Version="8.0.0-rc.2" />
 		<PackageReference Include="Photino.Blazor" Version="3.2.0" />
 	</ItemGroup>
 
