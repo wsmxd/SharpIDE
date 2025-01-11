@@ -58,6 +58,7 @@
 
 	private void LoadSolution(string solutionPath)
 	{
+		return;
 		var solutionFile = GetNodesInSolution.ParseSolutionFileFromPath("C:/Users/Matthew/Documents/Git/amazon/ClientPortal.sln");
 		ArgumentNullException.ThrowIfNull(solutionFile);
 		_solutionFile = solutionFile;

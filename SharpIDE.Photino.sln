@@ -18,6 +18,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharpIDE.Photino", "src\Sha
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharpIDE.Application", "src\SharpIDE.Application\SharpIDE.Application.csproj", "{D7D5D39E-DA3A-4B10-8F40-B07B769347F4}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{B6835010-35FA-4C74-AB48-009FB923185D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Roslyn.Benchmarks", "tests\Roslyn.Benchmarks\Roslyn.Benchmarks.csproj", "{252CE098-2F9A-4DA3-A172-EE1167B335BF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -35,9 +39,14 @@ Global
 		{D7D5D39E-DA3A-4B10-8F40-B07B769347F4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D7D5D39E-DA3A-4B10-8F40-B07B769347F4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D7D5D39E-DA3A-4B10-8F40-B07B769347F4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{252CE098-2F9A-4DA3-A172-EE1167B335BF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{252CE098-2F9A-4DA3-A172-EE1167B335BF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{252CE098-2F9A-4DA3-A172-EE1167B335BF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{252CE098-2F9A-4DA3-A172-EE1167B335BF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{E35167E1-0FF4-4194-97A8-CC95EDA224CD} = {F4ED837F-888A-4D01-BCED-C360B9CE0865}
 		{D7D5D39E-DA3A-4B10-8F40-B07B769347F4} = {F4ED837F-888A-4D01-BCED-C360B9CE0865}
+		{252CE098-2F9A-4DA3-A172-EE1167B335BF} = {B6835010-35FA-4C74-AB48-009FB923185D}
 	EndGlobalSection
 EndGlobal
