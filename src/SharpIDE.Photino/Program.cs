@@ -59,7 +59,8 @@ public class Program
 		};
 
 		var instance = MSBuildLocator.QueryVisualStudioInstances().OrderByDescending(instance => instance.Version).First();
-		MSBuildLocator.RegisterInstance(instance);
+		//MSBuildLocator.RegisterInstance(instance);
+		MSBuildLocator.RegisterDefaults();
 
 		app.Run();
 	}

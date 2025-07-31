@@ -26,7 +26,7 @@
 
 	private async Task PickSolution()
 	{
-		var files = await PhotinoBlazorApp.MainWindow.ShowOpenFileAsync("Choose Solution File", filters: [("Solution File", [".sln"])]);
+		var files = await PhotinoBlazorApp.MainWindow.ShowOpenFileAsync("Choose Solution File", filters: [("Solution File", [".sln", ".slnx"])]);
 		var slnFile = files.SingleOrDefault();
 		_solutionFilePath = slnFile;
 	}
