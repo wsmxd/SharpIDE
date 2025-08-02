@@ -52,7 +52,7 @@ public class BuildService
 
 		await Task.Run(async () =>
 		{
-			await BuildStarted.Invoke();
+			await BuildStarted.Invoke().ConfigureAwait(false);
 			var buildCompleteTcs = new TaskCompletionSource<BuildResult>();
 			BuildManager.DefaultBuildManager.BeginBuild(buildParameters);
 			var buildResult2 = BuildManager.DefaultBuildManager.PendBuildRequest(buildRequest);
