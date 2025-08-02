@@ -94,6 +94,7 @@
 	private async Task RestoreSolution() => await MsBuildSolution(BuildType.Restore);
 	private async Task MsBuildSolution(BuildType buildType)
 	{
+		if (AppState.IdeSettings.OpenTerminalOnBuildRebuildRestore) _terminalDrawerOpen = true;
 		await BuildService.MsBuildSolutionAsync(_solutionFilePath!, buildType);
 	}
 

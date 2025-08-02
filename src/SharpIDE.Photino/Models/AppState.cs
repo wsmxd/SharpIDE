@@ -10,4 +10,5 @@ public class IdeSettings
 {
 	public bool AutoOpenLastSolution { get; set; }
 	public bool AutoOpenTerminalOnLaunch { get; set; }
+	public bool OpenTerminalOnBuildRebuildRestore { get; set; }
 }

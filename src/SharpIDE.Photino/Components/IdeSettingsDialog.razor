@@ -5,6 +5,7 @@
 <MudStack Class="ml-2 mr-4 mb-2">
 	<MudSwitch @bind-Value="@AppState.IdeSettings.AutoOpenLastSolution" Label="Automatically open last solution" Color="Color.Primary" />
 	<MudSwitch @bind-Value="@AppState.IdeSettings.AutoOpenTerminalOnLaunch" Label="Automatically open terminal when SharpIDE starts" Color="Color.Primary" />
+	<MudSwitch @bind-Value="@AppState.IdeSettings.OpenTerminalOnBuildRebuildRestore" Label="Open the terminal on Build, Rebuild, Restore" Color="Color.Primary" />
 </MudStack>
 
 @code {
