@@ -104,6 +104,7 @@
 		if (AppState.IdeSettings.OpenTerminalOnBuildRebuildRestore) _terminalDrawerOpen = true;
 		_cancellationTokenSource = new CancellationTokenSource();
 		await BuildService.MsBuildSolutionAsync(_solutionFilePath!, buildType, _cancellationTokenSource.Token);
+		_cancellationTokenSource = null;
 	}
 	private async Task CancelBuild() => await _cancellationTokenSource!.CancelAsync();
 

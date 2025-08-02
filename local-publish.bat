@@ -1,3 +1,3 @@
 @echo on
-dotnet publish ./src/PhotinoBlazor.Template/PhotinoBlazor.Template.csproj -c Release
+dotnet publish ./src/SharpIDE.Photino/SharpIDE.Photino.csproj -c Release
 pause
