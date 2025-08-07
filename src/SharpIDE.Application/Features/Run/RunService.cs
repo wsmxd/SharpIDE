@@ -20,6 +20,9 @@ public class RunService
 		var semaphoreSlim = _projectLocks.GetOrAdd(project, new SemaphoreSlim(1, 1));
 		var waitResult = await semaphoreSlim.WaitAsync(0);
 		if (waitResult is false) throw new InvalidOperationException($"Project {project.Name} is already running.");
+		if (project.RunningCancellationTokenSource is not null) throw new InvalidOperationException($"Project {project.Name} is already running with a cancellation token source.");
+
+		project.RunningCancellationTokenSource = new CancellationTokenSource();
 		try
 		{
 			var processStartInfo = new ProcessStartInfo2
@@ -48,15 +51,31 @@ public class RunService
 
 			project.Running = true;
 			GlobalEvents.InvokeProjectsRunningChanged();
-			await process.WaitForExitAsync();
+			await process.WaitForExitAsync().WaitAsync(project.RunningCancellationTokenSource.Token).ConfigureAwait(ConfigureAwaitOptions.SuppressThrowing);
+			if (project.RunningCancellationTokenSource.IsCancellationRequested)
+			{
+				process.End();
+				await process.WaitForExitAsync();
+			}
 			project.Running = false;
 			GlobalEvents.InvokeProjectsRunningChanged();
 
-			Console.WriteLine("Project ran successfully.");
+			Console.WriteLine("Project finished running");
 		}
 		finally
 		{
 			semaphoreSlim.Release();
 		}
+	}
+
+	public async Task CancelRunningProject(SharpIdeProjectModel project)
+	{
+		Guard.Against.Null(project, nameof(project));
+		if (project.Running is false) throw new InvalidOperationException($"Project {project.Name} is not running.");
+		if (project.RunningCancellationTokenSource is null) throw new InvalidOperationException($"Project {project.Name} does not have a running cancellation token source.");
+
+		await project.RunningCancellationTokenSource.CancelAsync();
+		project.RunningCancellationTokenSource.Dispose();
+		project.RunningCancellationTokenSource = null;
 	}
 }

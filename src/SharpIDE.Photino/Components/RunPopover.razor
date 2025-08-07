@@ -23,7 +23,7 @@
 								<MudSpacer/>
 								@if (project.Running)
 								{
-									<MudButton Style="min-width: 20px;">
+									<MudButton Style="min-width: 20px;" OnClick="@(async () => await RunService.CancelRunningProject(project))">
 										<MudIcon Icon="@Icons.Material.Filled.Stop" Size="Size.Medium" Color="Color.Error"/>
 									</MudButton>
 								}

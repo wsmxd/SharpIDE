@@ -28,6 +28,7 @@ public class SharpIdeProjectModel : ISharpIdeNode
 	public required List<SharpIdeFile> Files { get; set; }
 	public bool Expanded { get; set; }
 	public bool Running { get; set; }
+	public CancellationTokenSource? RunningCancellationTokenSource { get; set; }
 	public required Task<Project> MsBuildEvaluationProjectTask { get; set; }
 
 	public Project MsBuildEvaluationProject => MsBuildEvaluationProjectTask.IsCompletedSuccessfully
