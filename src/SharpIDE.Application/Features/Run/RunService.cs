@@ -15,6 +15,7 @@ public class RunService
 	{
 		Guard.Against.Null(project, nameof(project));
 		Guard.Against.NullOrWhiteSpace(project.FilePath, nameof(project.FilePath), "Project file path cannot be null or empty.");
+		await Task.CompletedTask.ConfigureAwait(ConfigureAwaitOptions.ForceYielding);
 
 		var processStartInfo = new ProcessStartInfo2
 		{
