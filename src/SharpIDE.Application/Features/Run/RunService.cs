@@ -27,7 +27,7 @@ public class RunService
 			var processStartInfo = new ProcessStartInfo2
 			{
 				FileName = "dotnet",
-				Arguments = $"run --project \"{project.FilePath}\" --no-build",
+				Arguments = $"run --project \"{project.FilePath}\" --no-restore",
 				RedirectStandardOutput = true,
 				RedirectStandardError = true
 			};
