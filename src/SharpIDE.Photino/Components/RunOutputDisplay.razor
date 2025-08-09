@@ -1,0 +1,106 @@
+﻿@using Ardalis.GuardClauses
+@using SharpIDE.Application.Features.Build
+@using SharpIDE.Application.Features.SolutionDiscovery.VsPersistence
+@using XtermBlazor
+
+@inject BuildService BuildService
+
+@implements IDisposable
+<style>
+	.xterm-underline-5.xterm-underline-5 { /* Specificity hack lol */
+		text-decoration: dotted underline;
+	}
+</style>
+
+<div style="width: 100%; height: 100%; overflow: visible">
+	<Xterm @ref="@_terminalRef" Options="@_options" Style="height: calc(100% - 1px)" Addons="@_addons" OnFirstRender="@OnFirstRender"/>
+</div>
+
+@code {
+
+	[Parameter, EditorRequired]
+    public SharpIdeProjectModel Project { get; set; } = null!;
+
+	private Xterm _terminalRef;
+
+	private readonly TerminalOptions _options = new TerminalOptions
+	{
+		CursorBlink = true,
+		CursorStyle = CursorStyle.Bar,
+		Columns = 140,
+		FontFamily = "Cascadia Code",
+		FontWeightBold = "400",
+		Theme =
+		{
+			BrightGreen = "#98c379",
+			BrightRed = "#e06c75",
+			Foreground = "#dcdfe4",
+			Background = "#282c34",
+		},
+	};
+
+	private HashSet<string> _addons = ["addon-fit"];
+
+	protected override async Task OnInitializedAsync()
+	{
+		Project.ProjectStartedRunning += OnProjectStartedRunning;
+		// This event may/will be raised before the component is initialized, so we call OnProjectStartedRunning directly, for the first render.
+		await OnProjectStartedRunning();
+	}
+
+	private async Task OnProjectStartedRunning()
+	{
+		Guard.Against.Null(Project);
+		Guard.Against.Null(Project.RunningOutputChannel, nameof(Project.RunningOutputChannel));
+		await ClearPreviousOutput();
+		_ = Task.Run(async () =>
+		{
+			try
+			{
+				await foreach (var log in Project.RunningOutputChannel.Reader.ReadAllAsync())
+				{
+					await _terminalRef.Write(log);
+				}
+			}
+			catch (Exception e)
+			{
+				await DispatchExceptionAsync(e);
+			}
+		});
+	}
+
+	private async Task ClearPreviousOutput()
+	{
+		if (_terminalRef is not null)
+		{
+			await _terminalRef.Clear();
+			await InvokeAsync(StateHasChanged);
+		}
+	}
+
+	public void Dispose() => Project.ProjectStartedRunning -= OnProjectStartedRunning;
+
+	private async Task OnFirstRender()
+	{
+		await _terminalRef.Addon("addon-fit").InvokeVoidAsync("fit");
+		_ = Task.Run(async () =>
+		{
+			try
+			{
+				while (true)
+				{
+					await Task.Delay(500).ConfigureAwait(false);
+					await InvokeAsync(async () =>
+					{
+						await _terminalRef.Addon("addon-fit").InvokeVoidAsync("fit");
+					});
+				}
+
+			}
+			catch (Exception e)
+			{
+				await DispatchExceptionAsync(e);
+			}
+		});
+	}
+}

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Concurrent;
+using System.Threading.Channels;
 using Ardalis.GuardClauses;
 using AsyncReadProcess;
 using SharpIDE.Application.Features.Events;
@@ -31,21 +32,28 @@ public class RunService
 				RedirectStandardError = true
 			};
 
-			var process = new AsyncReadProcess.Process2
+			var process = new Process2
 			{
 				StartInfo = processStartInfo
 			};
 
 			process.Start();
 
+			project.RunningOutputChannel = Channel.CreateUnbounded<string>(new UnboundedChannelOptions
+			{
+				SingleReader = true,
+				SingleWriter = false,
+			});
 			var logsDrained = new TaskCompletionSource();
 			_ = Task.Run(async () =>
 			{
 				await foreach(var log in process.CombinedOutputChannel.Reader.ReadAllAsync())
 				{
 					var logString = System.Text.Encoding.UTF8.GetString(log, 0, log.Length);
-					Console.Write(logString);
+					//Console.Write(logString);
+					await project.RunningOutputChannel.Writer.WriteAsync(logString).ConfigureAwait(false);
 				}
+				project.RunningOutputChannel.Writer.Complete();
 				logsDrained.TrySetResult();
 			});
 
@@ -53,6 +61,7 @@ public class RunService
 			project.OpenInRunPanel = true;
 			GlobalEvents.InvokeProjectsRunningChanged();
 			GlobalEvents.InvokeStartedRunningProject();
+			project.InvokeProjectStartedRunning();
 			await process.WaitForExitAsync().WaitAsync(project.RunningCancellationTokenSource.Token).ConfigureAwait(ConfigureAwaitOptions.SuppressThrowing);
 			if (project.RunningCancellationTokenSource.IsCancellationRequested)
 			{

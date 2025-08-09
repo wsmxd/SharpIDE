@@ -11,14 +11,17 @@
 		.lowercase-tab-header {
 			text-transform: none;
 		}
+		.panels-full-height {
+			height: 100%;
+		}
 	</style>
 	@* <MudText>Run</MudText> *@
-	<MudTabs KeepPanelsAlive="true" TabPanelClass="lowercase-tab-header">
+	<MudTabs Style="height: 100%" KeepPanelsAlive="true" PanelClass="panels-full-height" TabPanelClass="lowercase-tab-header">
 		<ChildContent>
 			@foreach (var tab in OpenTabs)
 			{
-				<MudTabPanel ID="@tab" Text="@tab.Name">
-					Tab content
+				<MudTabPanel Style="height: 100%" ID="@tab" Text="@tab.Name">
+					<RunOutputDisplay Project="@tab"/>
 				</MudTabPanel>
 			}
 		</ChildContent>
