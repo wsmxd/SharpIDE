@@ -3,5 +3,6 @@
 public enum BottomPanelType
 {
 	Run,
-	Build
+	Build,
+	Problems
 }

@@ -54,6 +54,7 @@
 				<MudStack AlignItems="AlignItems.Center" Spacing="1" Style="padding: 4px; height: 100%">
 					<SidebarIconButton Icon="@Icons.Material.Filled.FolderOpen" Text="Explorer" OnClick="@DrawerToggle" Selected="@_drawerOpen" />
 					<MudSpacer />
+					<SidebarIconButton Icon="@Icons.Material.Filled.ReportProblem" Text="Problems" OnClick="@ClickProblemsPanel" Selected="@(_selectedBottomPanel is BottomPanelType.Problems)" />
 					<SidebarIconButton Icon="@Icons.Material.Filled.PlayArrow" Text="Run" OnClick="@ClickRunPanel" Selected="@(_selectedBottomPanel is BottomPanelType.Run)" />
 					<SidebarIconButton Icon="@Icons.Material.Filled.Terminal" Text="Build" OnClick="@ClickBuildPanel" Selected="@(_selectedBottomPanel is BottomPanelType.Build)" />
 				</MudStack>
@@ -80,6 +81,9 @@
 				<div class="mud-elevation-24" style="height: 30%; position:relative">
 					@if (_solutionFilePath is not null)
 					{
+						<DisplayNoneComponent Visible="@(_selectedBottomPanel is BottomPanelType.Problems)">
+							<ProblemsPanel SolutionModel="@_solutionModel" />
+						</DisplayNoneComponent>
 						<DisplayNoneComponent Visible="@(_selectedBottomPanel is BottomPanelType.Run)">
 							<RunPanel SolutionModel="@_solutionModel"/>
 						</DisplayNoneComponent>
@@ -107,6 +111,7 @@
 
 	private string MainContentHeight => _bottomDrawerOpen ? "70%" : "100%";
 
+	private void ClickProblemsPanel() => SwitchOrToggleBottomPanel(BottomPanelType.Problems);
 	private void ClickRunPanel() => SwitchOrToggleBottomPanel(BottomPanelType.Run);
 	private void ClickBuildPanel() => SwitchOrToggleBottomPanel(BottomPanelType.Build);
 	private void SwitchOrToggleBottomPanel(BottomPanelType bottomPanelType)
