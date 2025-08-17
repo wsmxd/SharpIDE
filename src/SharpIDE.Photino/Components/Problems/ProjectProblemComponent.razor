@@ -5,10 +5,10 @@
 
 @if (_diagnostics.Length is not 0)
 {
-	<MudTreeViewItem T="string" TextTypo="Typo.body2" EndTextTypo="Typo.caption" Expanded="true" Icon="@Icons.Material.Filled.Code" IconColor="Color.Success" Value="@ProjectModel.Name" Text="@ProjectModel.Name" EndText="@($"{_diagnostics.Length} diagnostics")">
+	<MudTreeViewItem T="string" TextTypo="Typo.body2" EndTextTypo="Typo.caption" Expanded="false" Icon="@Icons.Material.Filled.Code" IconColor="Color.Success" Value="@ProjectModel.Name" Text="@ProjectModel.Name" EndText="@($"{_diagnostics.Length} diagnostics")">
 		@foreach (var diagnostic in _diagnostics)
 		{
-			<MudTreeViewItem T="string" TextTypo="Typo.body2" Icon="@Icons.Material.Filled.Folder" IconColor="Color.Primary" Value="@diagnostic.Id" Text="@diagnostic.Id">
+			<MudTreeViewItem T="string" TextTypo="Typo.body2" Icon="@Icons.Material.Filled.Warning" IconColor="@GetDiagnosticIconColour(diagnostic)" Value="@diagnostic.Id" Text="@diagnostic.GetMessage()">
 			</MudTreeViewItem>
 		}
 	</MudTreeViewItem>
@@ -19,6 +19,14 @@
 	public SharpIdeProjectModel ProjectModel { get; set; } = null!;
 
 	private ImmutableArray<Diagnostic> _diagnostics = [];
+
+	private static Color GetDiagnosticIconColour(Diagnostic diagnostic) => diagnostic.Severity switch
+	{
+		DiagnosticSeverity.Error => Color.Error,
+		DiagnosticSeverity.Warning => Color.Warning,
+		DiagnosticSeverity.Info => Color.Info,
+		_ => Color.Info
+	};
 
 	protected override async Task OnInitializedAsync()
 	{
