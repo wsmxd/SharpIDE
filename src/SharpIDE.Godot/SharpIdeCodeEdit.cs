@@ -92,8 +92,14 @@ public partial class SharpIdeCodeEdit : CodeEdit
 	public void ProvideSyntaxHighlighting(IEnumerable<(FileLinePositionSpan fileSpan, ClassifiedSpan classifiedSpan)> classifiedSpans)
 	{
 		_syntaxHighlighter.ClassifiedSpans = classifiedSpans;
-		_syntaxHighlighter.UpdateCache(); // not sure if correct
-		QueueRedraw(); // TODO: Not working
+		Callable.From(() =>
+		{
+			_syntaxHighlighter.ClearHighlightingCache();
+			//_syntaxHighlighter.UpdateCache();
+			SyntaxHighlighter = null;
+			SyntaxHighlighter = _syntaxHighlighter; // Reassign to trigger redraw
+			GD.Print("Provided syntax highlighting");
+		}).CallDeferred();
 	}
 
 	private void OnCodeFixesRequested()
