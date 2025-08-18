@@ -52,7 +52,7 @@ public partial class CustomHighlighter : SyntaxHighlighter
         return highlights;
     }
     
-    private Color GetColorForClassification(string classificationType)
+    private static Color GetColorForClassification(string classificationType)
     {
         return classificationType switch
         {
