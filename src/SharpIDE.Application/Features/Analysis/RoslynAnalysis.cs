@@ -121,7 +121,8 @@ public static class RoslynAnalysis
 		Guard.Against.Null(compilation, nameof(compilation));
 
 		var diagnostics = compilation.GetDiagnostics(cancellationToken);
-		return diagnostics.Where(d => d.Severity is not DiagnosticSeverity.Hidden).ToImmutableArray();
+		diagnostics = diagnostics.Where(d => d.Severity is not DiagnosticSeverity.Hidden).ToImmutableArray();
+		return diagnostics;
 	}
 
 	public static async Task<ImmutableArray<CodeAction>> GetCodeFixesAsync(Diagnostic diagnostic)
