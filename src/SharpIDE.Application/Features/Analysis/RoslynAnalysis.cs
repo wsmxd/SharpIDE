@@ -10,6 +10,7 @@ using Microsoft.CodeAnalysis.Host.Mef;
 using Microsoft.CodeAnalysis.MSBuild;
 using Microsoft.CodeAnalysis.Text;
 using NuGet.Packaging;
+using SharpIDE.Application.Features.SolutionDiscovery;
 using SharpIDE.Application.Features.SolutionDiscovery.VsPersistence;
 
 namespace SharpIDE.Application.Features.Analysis;
@@ -121,6 +122,23 @@ public static class RoslynAnalysis
 		Guard.Against.Null(compilation, nameof(compilation));
 
 		var diagnostics = compilation.GetDiagnostics(cancellationToken);
+		diagnostics = diagnostics.Where(d => d.Severity is not DiagnosticSeverity.Hidden).ToImmutableArray();
+		return diagnostics;
+	}
+
+	public static async Task<ImmutableArray<Diagnostic>> GetDocumentDiagnostics(SharpIdeFile fileModel)
+	{
+		await _solutionLoadedTcs.Task;
+		var cancellationToken = CancellationToken.None;
+		var project = _workspace!.CurrentSolution.Projects.Single(s => s.FilePath == ((IChildSharpIdeNode)fileModel).GetNearestProjectNode()!.FilePath);
+		var document = project.Documents.Single(s => s.FilePath == fileModel.Path);
+		//var document = _workspace!.CurrentSolution.GetDocument(fileModel.Path);
+		Guard.Against.Null(document, nameof(document));
+
+		var semanticModel = await document.GetSemanticModelAsync(cancellationToken);
+		Guard.Against.Null(semanticModel, nameof(semanticModel));
+
+		var diagnostics = semanticModel.GetDiagnostics(cancellationToken: cancellationToken);
 		diagnostics = diagnostics.Where(d => d.Severity is not DiagnosticSeverity.Hidden).ToImmutableArray();
 		return diagnostics;
 	}

@@ -1,4 +1,6 @@
+using System.Collections.Immutable;
 using Godot;
+using Microsoft.CodeAnalysis;
 
 namespace SharpIDE.Godot;
 
@@ -7,15 +9,11 @@ public partial class SharpIdeCodeEdit : CodeEdit
 	[Signal]
 	public delegate void CodeFixesRequestedEventHandler();
 
-	[Export]
-	public int HighlightStartOffset = 0;
-	
-	[Export]
-	public int HighlightEndOffset = 0;
-
 	private int _currentLine;
 	private int _selectionStartCol;
 	private int _selectionEndCol;
+
+	private ImmutableArray<Diagnostic> _diagnostics = [];
 	
 	public override void _Ready()
 	{
@@ -44,18 +42,19 @@ public partial class SharpIdeCodeEdit : CodeEdit
 		int lineLength = GetLine(line).Length;
 		caretStartCol = Mathf.Clamp(caretStartCol, 0, lineLength);
 		caretEndCol   = Mathf.Clamp(caretEndCol, 0, lineLength);
-
-		var charRect = GetRectAtLineColumn(line, caretEndCol);
-		var charWidth = charRect.Size.X;
 		
-		var startPos = GetPosAtLineColumn(line, caretStartCol);
+		// GetRectAtLineColumn returns the rectangle for the character before the column passed in, or the first character if the column is 0.
+		var startRect = GetRectAtLineColumn(line, caretStartCol);
+		var endRect = GetRectAtLineColumn(line, caretEndCol);
+		//DrawLine(startRect.Position, startRect.End, color);
+		//DrawLine(endRect.Position, endRect.End, color);
+		
+		var startPos = startRect.End;
 		if (caretStartCol is 0)
 		{
-			startPos.X -= 9; // Seems to be a bug or intended "feature" of GetPosAtLineColumn
+			startPos.X -= startRect.Size.X;
 		}
-		var endPos   = GetPosAtLineColumn(line, caretEndCol);
-		startPos.X += charWidth;
-		endPos.X   += charWidth;
+		var endPos = endRect.End;
 		startPos.Y -= 1;
 		endPos.Y   -= 1;
 		DrawLine(startPos, endPos, color, thickness);
@@ -63,7 +62,28 @@ public partial class SharpIdeCodeEdit : CodeEdit
 	public override void _Draw()
 	{
 		UnderlineRange(_currentLine, _selectionStartCol, _selectionEndCol, new Color(1, 0, 0));
-		//UnderlineRange(_currentLine, 0, 7, new Color(1, 0, 0));
+		foreach (var diagnostic in _diagnostics)
+		{
+			if (diagnostic.Location.IsInSource)
+			{
+				var mappedLineSpan = (diagnostic.Location.SourceTree?.GetMappedLineSpan(diagnostic.Location.SourceSpan))!.Value;
+				var line = mappedLineSpan.StartLinePosition.Line;
+				var startCol = mappedLineSpan.StartLinePosition.Character;
+				var endCol = mappedLineSpan.EndLinePosition.Character;
+				var color = diagnostic.Severity switch
+				{
+					DiagnosticSeverity.Error => new Color(1, 0, 0),
+					DiagnosticSeverity.Warning => new Color(1, 1, 0),
+					_ => new Color(0, 1, 0) // Info or other
+				};
+				UnderlineRange(line, startCol, endCol, color);
+			}
+		}
+	}
+
+	public void ProvideDiagnostics(ImmutableArray<Diagnostic> diagnostics)
+	{
+		_diagnostics = diagnostics;
 	}
 
 	private void OnCodeFixesRequested()
