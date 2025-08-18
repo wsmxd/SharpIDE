@@ -8,6 +8,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <!-- Modified DLL implementing https://github.com/dotnet/roslyn/pull/79934, remove once merged -->
+    <Reference Include="Microsoft.CodeAnalysis.Workspaces.MSBuild">
+      <HintPath>.\Microsoft.CodeAnalysis.Workspaces.MSBuild.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
 <!-- If any Microsoft.Build.*.dll (Excluding Locator) ends up in the output, it will be prioritised for loading by MSBuild Nodes  -->
     <PackageReference Include="Ardalis.GuardClauses" Version="5.0.0" />
     <PackageReference Include="AsyncReadProcess" Version="1.0.0-preview9" />
@@ -19,7 +24,7 @@
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Features" Version="5.0.0-2.25416.112" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="5.0.0-2.25416.112" />
     <PackageReference Include="Microsoft.CodeAnalysis.Features" Version="5.0.0-2.25416.112" />
-    <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.MSBuild" Version="5.0.0-2.25416.112" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.MSBuild" Version="5.0.0-2.25416.112" PrivateAssets="all" ExcludeAssets="runtime" /> <!-- Exclude assets, ie main dll, as we provide our own. Must keep reference so that BuildHost is place in output dir -->
     <PackageReference Include="Microsoft.VisualStudio.SolutionPersistence" Version="1.0.52" />
     <PackageReference Include="NuGet.Protocol" Version="6.14.0" />
   </ItemGroup>
