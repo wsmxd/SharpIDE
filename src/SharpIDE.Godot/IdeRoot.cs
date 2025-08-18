@@ -13,6 +13,7 @@ public partial class IdeRoot : Control
 	private Button _openSlnButton = null!;
 	private FileDialog _fileDialog = null!;
 	private SharpIdeCodeEdit _sharpIdeCodeEdit = null!;
+	private SolutionExplorerPanel _solutionExplorerPanel = null!;
 	public override void _Ready()
 	{
 		MSBuildLocator.RegisterDefaults();
@@ -20,6 +21,7 @@ public partial class IdeRoot : Control
 		_openSlnButton = GetNode<Button>("%OpenSlnButton");
 		_sharpIdeCodeEdit = GetNode<SharpIdeCodeEdit>("%SharpIdeCodeEdit");
 		_fileDialog = GetNode<FileDialog>("%OpenSolutionDialog");
+		_solutionExplorerPanel = GetNode<SolutionExplorerPanel>("%SolutionExplorerPanel");
 		_fileDialog.FileSelected += OnFileSelected;
 		_openSlnButton.Pressed += () => _fileDialog.Visible = true;
 		//_fileDialog.Visible = true;
@@ -32,6 +34,8 @@ public partial class IdeRoot : Control
 		{
 			GD.Print($"Selected: {path}");
 			var solutionModel = await VsPersistenceMapper.GetSolutionModel(path);
+			_solutionExplorerPanel.SolutionModel = solutionModel;
+			_solutionExplorerPanel.RepopulateTree();
 			RoslynAnalysis.StartSolutionAnalysis(path);
 			var infraProject = solutionModel.AllProjects.Single(s => s.Name == "Infrastructure");
 			var diFile = infraProject.Files.Single(s => s.Name == "DependencyInjection.cs");

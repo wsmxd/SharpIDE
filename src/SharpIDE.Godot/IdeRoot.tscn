@@ -1,8 +1,9 @@
-[gd_scene load_steps=4 format=3 uid="uid://b2oniigcp5ew5"]
+[gd_scene load_steps=5 format=3 uid="uid://b2oniigcp5ew5"]
 
 [ext_resource type="Script" uid="uid://bavypuy7b375x" path="res://IdeRoot.cs" id="1_whawi"]
 [ext_resource type="Script" uid="uid://du2lt7r1p1qfy" path="res://SharpIdeCodeEdit.cs" id="2_qjf5e"]
 [ext_resource type="FontFile" uid="uid://7jc0nj310cu6" path="res://CascadiaCode.ttf" id="2_rk34b"]
+[ext_resource type="Script" uid="uid://bai53k7ongbxw" path="res://SolutionExplorerPanel.cs" id="2_tcy02"]
 
 [node name="IdeRoot" type="Control"]
 layout_mode = 3
@@ -40,15 +41,30 @@ size_flags_vertical = 3
 custom_minimum_size = Vector2(50, 0)
 layout_mode = 2
 
-[node name="HSplitContainer" type="HSplitContainer" parent="VBoxContainer/HBoxContainer"]
+[node name="VSplitContainer" type="VSplitContainer" parent="VBoxContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+split_offset = 5000
+
+[node name="HSplitContainer" type="HSplitContainer" parent="VBoxContainer/HBoxContainer/VSplitContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
 split_offset = 250
 
-[node name="SolutionExplorerPanel" type="Panel" parent="VBoxContainer/HBoxContainer/HSplitContainer"]
+[node name="SolutionExplorerPanel" type="Panel" parent="VBoxContainer/HBoxContainer/VSplitContainer/HSplitContainer"]
+unique_name_in_owner = true
 layout_mode = 2
+script = ExtResource("2_tcy02")
 
-[node name="SharpIdeCodeEdit" type="CodeEdit" parent="VBoxContainer/HBoxContainer/HSplitContainer"]
+[node name="Tree" type="Tree" parent="VBoxContainer/HBoxContainer/VSplitContainer/HSplitContainer/SolutionExplorerPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="SharpIdeCodeEdit" type="CodeEdit" parent="VBoxContainer/HBoxContainer/VSplitContainer/HSplitContainer"]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/current_line_color = Color(0.0588235, 0.0588235, 0.0588235, 1)
@@ -64,10 +80,13 @@ auto_brace_completion_enabled = true
 auto_brace_completion_highlight_matching = true
 script = ExtResource("2_qjf5e")
 
-[node name="CodeFixesMenu" type="PopupMenu" parent="VBoxContainer/HBoxContainer/HSplitContainer/SharpIdeCodeEdit"]
+[node name="CodeFixesMenu" type="PopupMenu" parent="VBoxContainer/HBoxContainer/VSplitContainer/HSplitContainer/SharpIdeCodeEdit"]
 item_count = 1
 item_0/text = "Getting Context Actions..."
 item_0/id = 0
+
+[node name="Panel" type="Panel" parent="VBoxContainer/HBoxContainer/VSplitContainer"]
+layout_mode = 2
 
 [node name="OpenSolutionDialog" type="FileDialog" parent="."]
 unique_name_in_owner = true
