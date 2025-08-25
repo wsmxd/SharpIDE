@@ -20,6 +20,8 @@ public partial class RunPanel : Control
 	{
 		_tabBar = GetNode<TabBar>("%TabBar");
 		_tabBar.ClearTabs();
+		//_tabBar.TabClosePressed
+		_tabBar.TabClicked += OnTabBarTabClicked;
 		_tabsPanel = GetNode<Panel>("%TabsPanel");
 		GlobalEvents.ProjectStartedRunning += async projectModel =>
 		{
@@ -31,12 +33,26 @@ public partial class RunPanel : Control
 		};
 	}
 
+	private void OnTabBarTabClicked(long idx)
+	{
+		var children = _tabsPanel.GetChildren().OfType<RunPanelTab>().ToList();
+		foreach (var child in children)
+		{
+			child.Visible = false;
+		}
+
+		var tab = children.Single(t => t.TabBarTab == idx);
+		tab.Visible = true;
+	}
+
 	public void ProjectStartedRunning(SharpIdeProjectModel projectModel)
 	{
 		var existingRunPanelTab = _tabsPanel.GetChildren().OfType<RunPanelTab>().SingleOrDefault(s => s.Project == projectModel);
 		if (existingRunPanelTab != null)
 		{
 			_tabBar.SetTabIcon(existingRunPanelTab.TabBarTab, RunningIcon);
+			_tabBar.CurrentTab = existingRunPanelTab.TabBarTab;
+			OnTabBarTabClicked(existingRunPanelTab.TabBarTab);
 			existingRunPanelTab.ClearTerminal();
 			existingRunPanelTab.StartWritingFromProjectOutput();
 			return;
@@ -48,7 +64,9 @@ public partial class RunPanel : Control
 		var tabIdx = _tabBar.GetTabCount() - 1;
 		runPanelTab.TabBarTab = tabIdx;
 		_tabBar.SetTabIcon(runPanelTab.TabBarTab, RunningIcon);
+		_tabBar.CurrentTab = runPanelTab.TabBarTab;
 		_tabsPanel.AddChild(runPanelTab);
+		OnTabBarTabClicked(runPanelTab.TabBarTab);
 		runPanelTab.StartWritingFromProjectOutput();
 	}
 	
