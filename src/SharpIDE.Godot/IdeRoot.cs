@@ -56,9 +56,6 @@ public partial class IdeRoot : Control
 				_solutionExplorerPanel.SolutionModel = solutionModel;
 				Callable.From(_solutionExplorerPanel.RepopulateTree).CallDeferred();
 				RoslynAnalysis.StartSolutionAnalysis(path);
-				var infraProject = solutionModel.AllProjects.Single(s => s.Name == "Infrastructure");
-				var diFile = infraProject.Files.Single(s => s.Name == "DependencyInjection.cs");
-				await this.InvokeAsync(async () => await _sharpIdeCodeEdit.SetSharpIdeFile(diFile));
 				
 				var tasks = solutionModel.AllProjects.Select(p => p.MsBuildEvaluationProjectTask).ToList();
 				await Task.WhenAll(tasks).ConfigureAwait(false);
@@ -74,6 +71,11 @@ public partial class IdeRoot : Control
 					}
 					_runMenuButton.Disabled = false;
 				});
+				
+				var infraProject = solutionModel.AllProjects.Single(s => s.Name == "Infrastructure");
+				var diFile = infraProject.Files.Single(s => s.Name == "DependencyInjection.cs");
+				await this.InvokeAsync(async () => await _sharpIdeCodeEdit.SetSharpIdeFile(diFile));
+				
 				//var runnableProject = solutionModel.AllProjects.First(s => s.IsRunnable);
 				//await this.InvokeAsync(() => _runPanel.NewRunStarted(runnableProject));
 			}

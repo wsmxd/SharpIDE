@@ -1,7 +1,8 @@
-[gd_scene load_steps=3 format=3 uid="uid://d2ewm2lajutpv"]
+[gd_scene load_steps=4 format=3 uid="uid://d2ewm2lajutpv"]
 
 [ext_resource type="Script" uid="uid://btsnapfx0dlbb" path="res://Features/Run/RunMenuItem.cs" id="1_syj0f"]
 [ext_resource type="Texture2D" uid="uid://bnprs1lvjyaji" path="res://Features/Run/Play.png" id="1_xfxpu"]
+[ext_resource type="Texture2D" uid="uid://csj1r7s3u10ch" path="res://Features/Run/Stop.png" id="4_cd138"]
 
 [node name="RunMenuItem" type="HBoxContainer"]
 offset_right = 40.0
@@ -19,3 +20,8 @@ size_flags_horizontal = 3
 [node name="RunButton" type="Button" parent="."]
 layout_mode = 2
 icon = ExtResource("1_xfxpu")
+
+[node name="StopButton" type="Button" parent="."]
+visible = false
+layout_mode = 2
+icon = ExtResource("4_cd138")
