@@ -47,43 +47,35 @@ public partial class IdeRoot : Control
 
 	private void OnFileSelected(string path)
 	{
-		_ = Task.Run(async () =>
+		_ = GodotTask.Run(async () =>
 		{
-			try
-			{
-				GD.Print($"Selected: {path}");
-				var solutionModel = await VsPersistenceMapper.GetSolutionModel(path);
-				_solutionExplorerPanel.SolutionModel = solutionModel;
-				Callable.From(_solutionExplorerPanel.RepopulateTree).CallDeferred();
-				RoslynAnalysis.StartSolutionAnalysis(path);
+			GD.Print($"Selected: {path}");
+			var solutionModel = await VsPersistenceMapper.GetSolutionModel(path);
+			_solutionExplorerPanel.SolutionModel = solutionModel;
+			Callable.From(_solutionExplorerPanel.RepopulateTree).CallDeferred();
+			RoslynAnalysis.StartSolutionAnalysis(path);
 				
-				var tasks = solutionModel.AllProjects.Select(p => p.MsBuildEvaluationProjectTask).ToList();
-				await Task.WhenAll(tasks).ConfigureAwait(false);
-				var runnableProjects = solutionModel.AllProjects.Where(p => p.IsRunnable).ToList();
-				await this.InvokeAsync(() =>
+			var tasks = solutionModel.AllProjects.Select(p => p.MsBuildEvaluationProjectTask).ToList();
+			await Task.WhenAll(tasks).ConfigureAwait(false);
+			var runnableProjects = solutionModel.AllProjects.Where(p => p.IsRunnable).ToList();
+			await this.InvokeAsync(() =>
+			{
+				var runMenuPopupVbox = _runMenuPopup.GetNode<VBoxContainer>("MarginContainer/VBoxContainer");
+				foreach (var project in runnableProjects)
 				{
-					var runMenuPopupVbox = _runMenuPopup.GetNode<VBoxContainer>("MarginContainer/VBoxContainer");
-					foreach (var project in runnableProjects)
-					{
-						var runMenuItem = _runMenuItemScene.Instantiate<RunMenuItem>();
-						runMenuItem.Project = project;
-						runMenuPopupVbox.AddChild(runMenuItem);
-					}
-					_runMenuButton.Disabled = false;
-				});
+					var runMenuItem = _runMenuItemScene.Instantiate<RunMenuItem>();
+					runMenuItem.Project = project;
+					runMenuPopupVbox.AddChild(runMenuItem);
+				}
+				_runMenuButton.Disabled = false;
+			});
 				
-				var infraProject = solutionModel.AllProjects.Single(s => s.Name == "Infrastructure");
-				var diFile = infraProject.Files.Single(s => s.Name == "DependencyInjection.cs");
-				await this.InvokeAsync(async () => await _sharpIdeCodeEdit.SetSharpIdeFile(diFile));
+			var infraProject = solutionModel.AllProjects.Single(s => s.Name == "Infrastructure");
+			var diFile = infraProject.Files.Single(s => s.Name == "DependencyInjection.cs");
+			await this.InvokeAsync(async () => await _sharpIdeCodeEdit.SetSharpIdeFile(diFile));
 				
-				//var runnableProject = solutionModel.AllProjects.First(s => s.IsRunnable);
-				//await this.InvokeAsync(() => _runPanel.NewRunStarted(runnableProject));
-			}
-			catch (Exception e)
-			{
-				GD.PrintErr($"Error loading solution: {e.Message}");
-				GD.PrintErr(e.StackTrace);
-			}
+			//var runnableProject = solutionModel.AllProjects.First(s => s.IsRunnable);
+			//await this.InvokeAsync(() => _runPanel.NewRunStarted(runnableProject));
 		});
 	}
 }

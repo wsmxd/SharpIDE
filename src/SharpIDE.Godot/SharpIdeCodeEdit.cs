@@ -114,22 +114,15 @@ public partial class SharpIdeCodeEdit : CodeEdit
 	{
 		// update the MSBuildWorkspace
 		RoslynAnalysis.UpdateDocument(_currentFile, Text);
-		_ = Task.Run(async () =>
+		_ = GodotTask.Run(async () =>
 		{
-			try
+			var syntaxHighlighting = await RoslynAnalysis.GetDocumentSyntaxHighlighting(_currentFile);
+			var diagnostics = await RoslynAnalysis.GetDocumentDiagnostics(_currentFile);
+			Callable.From(() =>
 			{
-				var syntaxHighlighting = await RoslynAnalysis.GetDocumentSyntaxHighlighting(_currentFile);
-				var diagnostics = await RoslynAnalysis.GetDocumentDiagnostics(_currentFile);
-				Callable.From(() =>
-				{
-					SetSyntaxHighlightingModel(syntaxHighlighting);
-					SetDiagnosticsModel(diagnostics);
-				}).CallDeferred();
-			}
-			catch (Exception ex)
-			{
-				GD.PrintErr($"Error Calling OnTextChanged: {ex.Message}");
-			}
+				SetSyntaxHighlightingModel(syntaxHighlighting);
+				SetDiagnosticsModel(diagnostics);
+			}).CallDeferred();
 		});
 	}
 
@@ -140,30 +133,23 @@ public partial class SharpIdeCodeEdit : CodeEdit
 		if (codeAction is null) return;
 		var currentCaretPosition = GetCaretPosition();
 		var vScroll = GetVScroll();
-		_ = Task.Run(async () =>
+		_ = GodotTask.Run(async () =>
 		{
-			try
+			await RoslynAnalysis.ApplyCodeActionAsync(codeAction);
+			var fileContents = await File.ReadAllTextAsync(_currentFile.Path);
+			var syntaxHighlighting = await RoslynAnalysis.GetDocumentSyntaxHighlighting(_currentFile);
+			var diagnostics = await RoslynAnalysis.GetDocumentDiagnostics(_currentFile);
+			Callable.From(() =>
 			{
-				await RoslynAnalysis.ApplyCodeActionAsync(codeAction);
-				var fileContents = await File.ReadAllTextAsync(_currentFile.Path);
-				var syntaxHighlighting = await RoslynAnalysis.GetDocumentSyntaxHighlighting(_currentFile);
-				var diagnostics = await RoslynAnalysis.GetDocumentDiagnostics(_currentFile);
-				Callable.From(() =>
-				{
-					BeginComplexOperation();
-					SetText(fileContents);
-					SetSyntaxHighlightingModel(syntaxHighlighting);
-					SetDiagnosticsModel(diagnostics);
-					SetCaretLine(currentCaretPosition.line);
-					SetCaretColumn(currentCaretPosition.col);
-					SetVScroll(vScroll);
-					EndComplexOperation();
-				}).CallDeferred();
-			}
-			catch (Exception ex)
-			{
-				GD.PrintErr($"Error applying code fix: {ex.Message}");
-			}
+				BeginComplexOperation();
+				SetText(fileContents);
+				SetSyntaxHighlightingModel(syntaxHighlighting);
+				SetDiagnosticsModel(diagnostics);
+				SetCaretLine(currentCaretPosition.line);
+				SetCaretColumn(currentCaretPosition.col);
+				SetVScroll(vScroll);
+				EndComplexOperation();
+			}).CallDeferred();
 		});
 	}
 
@@ -301,30 +287,23 @@ public partial class SharpIdeCodeEdit : CodeEdit
 		_popupMenu.AddItem("Getting Context Actions...", 0);
 		_popupMenu.Popup();
 		GD.Print($"Code fixes requested at line {caretLine}, column {caretColumn}");
-		_ = Task.Run(async () =>
+		_ = GodotTask.Run(async () =>
 		{
-			try
+			var linePos = new LinePosition(caretLine, caretColumn);
+			var codeActions = await RoslynAnalysis.GetCodeFixesForDocumentAtPosition(_currentFile, linePos);
+			Callable.From(() =>
 			{
-				var linePos = new LinePosition(caretLine, caretColumn);
-				var codeActions = await RoslynAnalysis.GetCodeFixesForDocumentAtPosition(_currentFile, linePos);
-				Callable.From(() =>
+				_popupMenu.Clear();
+				foreach (var (index, codeAction) in codeActions.Index())
 				{
-					_popupMenu.Clear();
-					foreach (var (index, codeAction) in codeActions.Index())
-					{
-						_currentCodeActionsInPopup = codeActions;
-						_popupMenu.AddItem(codeAction.Title, index);
-						//_popupMenu.SetItemMetadata(menuItem, codeAction);
-					}
+					_currentCodeActionsInPopup = codeActions;
+					_popupMenu.AddItem(codeAction.Title, index);
+					//_popupMenu.SetItemMetadata(menuItem, codeAction);
+				}
 
-					if (codeActions.Length is not 0) _popupMenu.SetFocusedItem(0);
-					GD.Print($"Code fixes found: {codeActions.Length}, displaying menu");
-				}).CallDeferred();
-			}
-			catch (Exception ex)
-			{
-				GD.Print(ex);
-			}
+				if (codeActions.Length is not 0) _popupMenu.SetFocusedItem(0);
+				GD.Print($"Code fixes found: {codeActions.Length}, displaying menu");
+			}).CallDeferred();
 		});
 	}
 
@@ -333,29 +312,22 @@ public partial class SharpIdeCodeEdit : CodeEdit
 		var (caretLine, caretColumn) = GetCaretPosition();
 		
 		GD.Print($"Code completion requested at line {caretLine}, column {caretColumn}");
-		_ = Task.Run(async () =>
+		_ = GodotTask.Run(async () =>
 		{
-			try
-			{
-				var linePos = new LinePosition(caretLine, caretColumn);
+			var linePos = new LinePosition(caretLine, caretColumn);
 				
-				var completions = await RoslynAnalysis.GetCodeCompletionsForDocumentAtPosition(_currentFile, linePos);
-				Callable.From(() =>
-				{
-					foreach (var completionItem in completions.ItemsList)
-					{
-						AddCodeCompletionOption(CodeCompletionKind.Class, completionItem.DisplayText, completionItem.DisplayText);
-					}
-					// partially working - displays menu only when caret is what CodeEdit determines as valid
-					UpdateCodeCompletionOptions(true);
-					//RequestCodeCompletion(true);
-					GD.Print($"Found {completions.ItemsList.Count} completions, displaying menu");
-				}).CallDeferred();
-			}
-			catch (Exception ex)
+			var completions = await RoslynAnalysis.GetCodeCompletionsForDocumentAtPosition(_currentFile, linePos);
+			Callable.From(() =>
 			{
-				GD.Print(ex);
-			}
+				foreach (var completionItem in completions.ItemsList)
+				{
+					AddCodeCompletionOption(CodeCompletionKind.Class, completionItem.DisplayText, completionItem.DisplayText);
+				}
+				// partially working - displays menu only when caret is what CodeEdit determines as valid
+				UpdateCodeCompletionOptions(true);
+				//RequestCodeCompletion(true);
+				GD.Print($"Found {completions.ItemsList.Count} completions, displaying menu");
+			}).CallDeferred();
 		});
 	}
 	
