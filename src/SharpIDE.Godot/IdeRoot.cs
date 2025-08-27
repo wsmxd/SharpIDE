@@ -4,6 +4,7 @@ using Godot;
 using Microsoft.Build.Locator;
 using SharpIDE.Application.Features.Analysis;
 using SharpIDE.Application.Features.SolutionDiscovery.VsPersistence;
+using SharpIDE.Godot.Features.CustomControls;
 using SharpIDE.Godot.Features.Run;
 using SharpIDE.Godot.Features.SolutionExplorer;
 
@@ -16,6 +17,7 @@ public partial class IdeRoot : Control
 	private FileDialog _fileDialog = null!;
 	private SharpIdeCodeEdit _sharpIdeCodeEdit = null!;
 	private SolutionExplorerPanel _solutionExplorerPanel = null!;
+	private InvertedVSplitContainer _invertedVSplitContainer = null!;
 	private RunPanel _runPanel = null!;
 	private Button _runMenuButton = null!;
 	private Popup _runMenuPopup = null!;
@@ -29,23 +31,27 @@ public partial class IdeRoot : Control
 		_buildSlnButton = GetNode<Button>("%BuildSlnButton");
 		_runMenuPopup = GetNode<Popup>("%RunMenuPopup");
 		_runMenuButton = GetNode<Button>("%RunMenuButton");
-		_runMenuButton.Pressed += () =>
-		{
-			var popupMenuPosition = _runMenuButton.GlobalPosition;
-			const int buttonHeight = 37;
-			_runMenuPopup.Position = new Vector2I((int)popupMenuPosition.X, (int)popupMenuPosition.Y + buttonHeight);
-			_runMenuPopup.Popup();
-		};
-		
 		_sharpIdeCodeEdit = GetNode<SharpIdeCodeEdit>("%SharpIdeCodeEdit");
 		_fileDialog = GetNode<FileDialog>("%OpenSolutionDialog");
 		_solutionExplorerPanel = GetNode<SolutionExplorerPanel>("%SolutionExplorerPanel");
+		_runPanel = GetNode<RunPanel>("%RunPanel");
+		_invertedVSplitContainer = GetNode<InvertedVSplitContainer>("%InvertedVSplitContainer");
+		
+		_runMenuButton.Pressed += OnRunMenuButtonPressed;
 		_solutionExplorerPanel.FileSelected += OnSolutionExplorerPanelOnFileSelected;
 		_fileDialog.FileSelected += OnFileSelected;
-		_runPanel = GetNode<RunPanel>("%RunPanel");
 		_openSlnButton.Pressed += () => _fileDialog.Visible = true;
 		_buildSlnButton.Pressed += OnBuildSlnButtonPressed;
+		GodotGlobalEvents.BottomPanelVisibilityChangeRequested += async show => await this.InvokeAsync(() => _invertedVSplitContainer.InvertedSetCollapsed(!show));
 		OnFileSelected(@"C:\Users\Matthew\Documents\Git\BlazorCodeBreaker\BlazorCodeBreaker.slnx");
+	}
+
+	private void OnRunMenuButtonPressed()
+	{
+		var popupMenuPosition = _runMenuButton.GlobalPosition;
+		const int buttonHeight = 37;
+		_runMenuPopup.Position = new Vector2I((int)popupMenuPosition.X, (int)popupMenuPosition.Y + buttonHeight);
+		_runMenuPopup.Popup();
 	}
 
 	private async void OnBuildSlnButtonPressed()

@@ -7,6 +7,23 @@ public partial class InvertedVSplitContainer : VSplitContainer
 {
     [Export]
     private int _invertedOffset = 200;
+    private bool _invertedCollapsed = false;
+
+    public void InvertedSetCollapsed(bool collapsed)
+    {
+        if (_invertedCollapsed == collapsed) return;
+        _invertedCollapsed = collapsed;
+        if (collapsed)
+        {
+            SplitOffset = (int)Size.Y + 100;
+            DraggingEnabled = false;
+        }
+        else
+        {
+            SplitOffset = (int)Size.Y - _invertedOffset;
+            DraggingEnabled = true;
+        }
+    }
 
     public override void _Ready()
     {

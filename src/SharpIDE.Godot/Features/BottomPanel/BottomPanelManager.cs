@@ -31,7 +31,11 @@ public partial class BottomPanelManager : Panel
         {
             if (type == null)
             {
-                // TODO: Ask parent to to collapse slider.
+                GodotGlobalEvents.InvokeBottomPanelVisibilityChangeRequested(false);
+            }
+            else
+            {
+                GodotGlobalEvents.InvokeBottomPanelVisibilityChangeRequested(true);
             }
             foreach (var kvp in _panelTypeMap)
             {
