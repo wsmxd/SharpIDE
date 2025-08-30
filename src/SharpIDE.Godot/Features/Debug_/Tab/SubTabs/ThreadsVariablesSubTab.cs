@@ -62,7 +62,7 @@ public partial class ThreadsVariablesSubTab : Control
 		var variableScenes = currentFrame.Scopes.SelectMany(s => s.Variables).Select(v =>
 		{
 			var variableListItem = _threadListItemScene.Instantiate<Control>();
-			variableListItem.GetNode<Label>("Label").Text = $"{v.Name}";
+			variableListItem.GetNode<Label>("Label").Text = $$"""{{v.Name}} = {{{v.Type}}} {{v.Value}}""";
 			return variableListItem;
 		}).ToList();
 		
