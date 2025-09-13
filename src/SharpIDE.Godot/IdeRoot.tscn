@@ -1,4 +1,4 @@
-[gd_scene load_steps=19 format=3 uid="uid://b2oniigcp5ew5"]
+[gd_scene load_steps=20 format=3 uid="uid://b2oniigcp5ew5"]
 
 [ext_resource type="FontFile" uid="uid://38igu11xwba6" path="res://Inter-VariableFont.ttf" id="1_7ptyn"]
 [ext_resource type="Script" uid="uid://bavypuy7b375x" path="res://IdeRoot.cs" id="1_whawi"]
@@ -34,13 +34,15 @@ content_margin_left = 4.0
 content_margin_top = 4.0
 content_margin_right = 4.0
 content_margin_bottom = 4.0
-bg_color = Color(0.1, 0.1, 0.1, 0.6)
+bg_color = Color(0.117647, 0.117647, 0.117647, 1)
 border_color = Color(0, 0, 0, 0.6)
 corner_radius_top_left = 3
 corner_radius_top_right = 3
 corner_radius_bottom_right = 3
 corner_radius_bottom_left = 3
 corner_detail = 5
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_7ptyn"]
 
 [node name="IdeRoot" type="Control"]
 layout_mode = 3
@@ -154,6 +156,7 @@ theme_override_colors/current_line_color = Color(0.0588235, 0.0588235, 0.0588235
 theme_override_fonts/font = SubResource("FontVariation_y3aoi")
 theme_override_font_sizes/font_size = 18
 theme_override_styles/normal = SubResource("StyleBoxFlat_v06ln")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_7ptyn")
 highlight_current_line = true
 symbol_lookup_on_click = true
 symbol_tooltip_on_hover = true
