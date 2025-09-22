@@ -91,6 +91,8 @@ public partial class SolutionExplorerPanel : MarginContainer
 		{
 			AddSlnFolderToTree(rootItem, folder);
 		}
+		rootItem.SetCollapsedRecursive(true);
+		rootItem.Collapsed = false;
 	}
 
 	private void AddSlnFolderToTree(TreeItem parent, SharpIdeSolutionFolder folder)
