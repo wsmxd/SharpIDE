@@ -29,5 +29,6 @@ public enum BottomPanelType
     Run,
     Debug,
     Build,
-    Problems
+    Problems,
+    IdeDiagnostics
 }

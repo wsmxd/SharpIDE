@@ -1,5 +1,6 @@
 using Godot;
 using SharpIDE.Application.Features.SolutionDiscovery.VsPersistence;
+using SharpIDE.Godot.Features.IdeDiagnostics;
 using SharpIDE.Godot.Features.Problems;
 
 namespace SharpIDE.Godot.Features.BottomPanel;
@@ -20,6 +21,7 @@ public partial class BottomPanelManager : Panel
     private Control _debugPanel = null!;
     private Control _buildPanel = null!;
     private ProblemsPanel _problemsPanel = null!;
+    private IdeDiagnosticsPanel _ideDiagnosticsPanel = null!;
 
     private Dictionary<BottomPanelType, Control> _panelTypeMap = [];
     
@@ -29,13 +31,15 @@ public partial class BottomPanelManager : Panel
         _debugPanel = GetNode<Control>("%DebugPanel");
         _buildPanel = GetNode<Control>("%BuildPanel");
         _problemsPanel = GetNode<ProblemsPanel>("%ProblemsPanel");
+        _ideDiagnosticsPanel = GetNode<IdeDiagnosticsPanel>("%IdeDiagnosticsPanel");
         
         _panelTypeMap = new Dictionary<BottomPanelType, Control>
         {
             { BottomPanelType.Run, _runPanel },
             { BottomPanelType.Debug, _debugPanel },
             { BottomPanelType.Build, _buildPanel },
-            { BottomPanelType.Problems, _problemsPanel }
+            { BottomPanelType.Problems, _problemsPanel },
+            { BottomPanelType.IdeDiagnostics, _ideDiagnosticsPanel }
         };
 
         GodotGlobalEvents.BottomPanelTabSelected += OnBottomPanelTabSelected;

@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=3 uid="uid://biyhfwx36ium8"]
+[gd_scene load_steps=10 format=3 uid="uid://biyhfwx36ium8"]
 
 [ext_resource type="Script" uid="uid://bddno1bbvvp5q" path="res://Features/LeftSideBar/LeftSideBar.cs" id="1_rgaf0"]
 [ext_resource type="ButtonGroup" uid="uid://c2nmo2x3va0gi" path="res://Features/LeftSideBar/LeftBottomSidebarButtonGroup.tres" id="2_1aad6"]
@@ -8,6 +8,7 @@
 [ext_resource type="Texture2D" uid="uid://cre7q0efp4vrq" path="res://Features/LeftSideBar/Resources/SidebarRun.svg" id="5_jg03n"]
 [ext_resource type="Texture2D" uid="uid://b0170ypw8uf3a" path="res://Features/LeftSideBar/Resources/Terminal.svg" id="6_ddh6f"]
 [ext_resource type="Texture2D" uid="uid://butisxqww0boc" path="res://Features/LeftSideBar/Resources/SidebarDebug.svg" id="6_jg03n"]
+[ext_resource type="Texture2D" uid="uid://dx8bt0adxpqgy" path="res://Features/LeftSideBar/Resources/Ide.svg" id="9_6ih3m"]
 
 [node name="LeftSideBar" type="Panel"]
 custom_minimum_size = Vector2(80, 0)
@@ -107,6 +108,21 @@ toggle_mode = true
 button_group = ExtResource("2_1aad6")
 text = "Build"
 icon = ExtResource("6_ddh6f")
+icon_alignment = 1
+vertical_icon_alignment = 0
+expand_icon = true
+
+[node name="IdeDiagnosticsButton" type="Button" parent="MarginContainer/VBoxContainer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 50)
+layout_mode = 2
+focus_mode = 0
+theme = ExtResource("3_prju6")
+theme_override_font_sizes/font_size = 13
+toggle_mode = true
+button_group = ExtResource("2_1aad6")
+text = "IDE"
+icon = ExtResource("9_6ih3m")
 icon_alignment = 1
 vertical_icon_alignment = 0
 expand_icon = true

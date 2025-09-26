@@ -1,4 +1,4 @@
-[gd_scene load_steps=17 format=3 uid="uid://b2oniigcp5ew5"]
+[gd_scene load_steps=18 format=3 uid="uid://b2oniigcp5ew5"]
 
 [ext_resource type="FontFile" uid="uid://38igu11xwba6" path="res://Inter-VariableFont.ttf" id="1_7ptyn"]
 [ext_resource type="Script" uid="uid://bavypuy7b375x" path="res://IdeRoot.cs" id="1_whawi"]
@@ -13,6 +13,7 @@
 [ext_resource type="PackedScene" uid="uid://tqpmww430cor" path="res://Features/Problems/ProblemsPanel.tscn" id="11_b7c1a"]
 [ext_resource type="PackedScene" uid="uid://dkjips8oudqou" path="res://Features/Debug_/DebugPanel.tscn" id="11_s2dv6"]
 [ext_resource type="PackedScene" uid="uid://8lk0qj233a7p" path="res://Features/Search/SearchWindow.tscn" id="13_7ptyn"]
+[ext_resource type="PackedScene" uid="uid://b0tjuqq3bca5e" path="res://Features/IdeDiagnostics/IdeDiagnosticsPanel.tscn" id="13_woo5i"]
 
 [sub_resource type="Theme" id="Theme_s2dv6"]
 default_font = ExtResource("1_7ptyn")
@@ -152,6 +153,11 @@ visible = false
 layout_mode = 1
 
 [node name="BuildPanel" parent="VBoxContainer/HBoxContainer/InvertedVSplitContainer/BottomPanel" instance=ExtResource("9_rllbf")]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+
+[node name="IdeDiagnosticsPanel" parent="VBoxContainer/HBoxContainer/InvertedVSplitContainer/BottomPanel" instance=ExtResource("13_woo5i")]
 unique_name_in_owner = true
 visible = false
 layout_mode = 1
