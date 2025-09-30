@@ -43,6 +43,11 @@ public static class NodeExtensions
                 child.QueueFree();
             }
         }
+        public void RemoveChildAndQueueFree(Node child)
+        {
+            node.RemoveChild(child);
+            child.QueueFree();
+        }
         public Task<T> InvokeAsync<T>(Func<T> workItem)
         {
             var taskCompletionSource = new TaskCompletionSource<T>(TaskCreationOptions.RunContinuationsAsynchronously);

@@ -20,7 +20,7 @@ public partial class CodeEditorPanel : MarginContainer
     public override void _Ready()
     {
         _tabContainer = GetNode<TabContainer>("TabContainer");
-        _tabContainer.RemoveChild(_tabContainer.GetChild(0)); // Remove the default tab
+        _tabContainer.RemoveChildAndQueueFree(_tabContainer.GetChild(0)); // Remove the default tab
         _tabContainer.TabClicked += OnTabClicked;
         var tabBar = _tabContainer.GetTabBar();
         tabBar.TabCloseDisplayPolicy = TabBar.CloseButtonDisplayPolicy.ShowAlways;
