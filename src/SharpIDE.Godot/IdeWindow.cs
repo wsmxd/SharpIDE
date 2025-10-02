@@ -83,6 +83,7 @@ public partial class IdeWindow : Control
             
             await this.InvokeAsync(() =>
             {
+                if (fullscreen is false) _slnPicker.GetParent<Window>().Hide();
                 _slnPicker.GetParent().RemoveChild(_slnPicker);
                 _slnPicker.QueueFree();
                 _slnPicker = null;
