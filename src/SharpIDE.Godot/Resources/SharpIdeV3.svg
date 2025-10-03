@@ -3,8 +3,8 @@
 
 <svg
    version="1.0"
-   width="530"
-   height="482"
+   width="529"
+   height="480"
    id="svg2"
    sodipodi:docname="SharpIdeV3.svg"
    inkscape:version="1.4.2 (f4327f4, 2025-05-13)"
@@ -21,9 +21,9 @@
      inkscape:pageopacity="0"
      inkscape:pagecheckerboard="0"
      inkscape:deskcolor="#505050"
-     inkscape:zoom="2"
-     inkscape:cx="338"
-     inkscape:cy="296.75"
+     inkscape:zoom="11.313709"
+     inkscape:cx="466.07176"
+     inkscape:cy="401.59246"
      inkscape:window-width="2560"
      inkscape:window-height="1369"
      inkscape:window-x="-8"
@@ -53,17 +53,17 @@
      transform="translate(-91.423889,-253.5866)"
      id="layer1">
     <path
-       d="m 315.42389,252.5866 185,331 h -206 l -40,71 h 365 l -222,-402 z"
+       d="m 314.42388,255.5866 185,331 h -206 l -40,71 h 365 l -222,-402 z"
        style="display:inline;fill:#c663fc;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:round;stroke-opacity:1"
        id="path3214"
        sodipodi:nodetypes="ccccccc" />
     <path
-       d="m 315.42389,252.5866 -221.000001,401 41.000001,75 182,-333 102,188 h 81 z"
+       d="m 314.42388,255.5866 -220.999998,401 40.999998,75 182,-333 102,188 h 81 z"
        style="display:inline;fill:#be51f6;fill-opacity:0.458955;fill-rule:evenodd;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:round;stroke-opacity:1"
        id="path4185"
        sodipodi:nodetypes="ccccccc" />
     <path
-       d="m 317.42389,395.5866 40.39329,74.45039 -103.39329,184.54961 h 365 l -38,74 h -446 z"
+       d="m 316.42388,398.5866 40.39329,74.45039 -103.39329,184.54961 h 365 l -38,74 h -446 z"
        style="display:inline;fill:#520c8c;fill-opacity:0.505597;fill-rule:evenodd;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:round;stroke-opacity:1"
        id="path5156"
        sodipodi:nodetypes="ccccccc" />
