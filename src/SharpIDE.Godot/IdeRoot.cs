@@ -4,6 +4,8 @@ using Microsoft.Extensions.Hosting;
 using SharpIDE.Application.Features.Analysis;
 using SharpIDE.Application.Features.Build;
 using SharpIDE.Application.Features.Events;
+using SharpIDE.Application.Features.FileWatching;
+using SharpIDE.Application.Features.Run;
 using SharpIDE.Application.Features.SolutionDiscovery;
 using SharpIDE.Application.Features.SolutionDiscovery.VsPersistence;
 using SharpIDE.Godot.Features.BottomPanel;
@@ -39,6 +41,10 @@ public partial class IdeRoot : Control
 	{
 		GodotGlobalEvents.Instance = new GodotGlobalEvents();
 		GlobalEvents.Instance = new GlobalEvents();
+		Singletons.RunService = new RunService();
+		Singletons.BuildService = new BuildService();
+		Singletons.FileWatcher?.Dispose();
+		Singletons.FileWatcher = new IdeFileWatcher();
 	}
 
 	public override void _Ready()

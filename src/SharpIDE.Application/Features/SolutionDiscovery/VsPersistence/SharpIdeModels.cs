@@ -34,6 +34,7 @@ public class SharpIdeSolutionModel : ISharpIdeNode, IExpandableSharpIdeNode
 {
 	public required string Name { get; set; }
 	public required string FilePath { get; set; }
+	public required string DirectoryPath { get; set; }
 	public required List<SharpIdeProjectModel> Projects { get; set; }
 	public required List<SharpIdeSolutionFolder> Folders { get; set; }
 	public required HashSet<SharpIdeProjectModel> AllProjects { get; set; }
@@ -48,6 +49,7 @@ public class SharpIdeSolutionModel : ISharpIdeNode, IExpandableSharpIdeNode
 		var allFiles = new ConcurrentBag<SharpIdeFile>();
 		Name = solutionName;
 		FilePath = solutionFilePath;
+		DirectoryPath = Path.GetDirectoryName(solutionFilePath)!;
 		Projects = intermediateModel.Projects.Select(s => new SharpIdeProjectModel(s, allProjects, allFiles, this)).ToList();
 		Folders = intermediateModel.SolutionFolders.Select(s => new SharpIdeSolutionFolder(s, allProjects, allFiles, this)).ToList();
 		AllProjects = allProjects.ToHashSet();
