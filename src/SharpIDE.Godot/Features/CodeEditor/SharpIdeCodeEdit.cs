@@ -89,7 +89,7 @@ public partial class SharpIdeCodeEdit : CodeEdit
 		_selectionStartCol = GetSelectionFromColumn();
 		_selectionEndCol = GetSelectionToColumn();
 		_currentLine = GetCaretLine();
-		GD.Print($"Selection changed to line {_currentLine}, start {_selectionStartCol}, end {_selectionEndCol}");
+		// GD.Print($"Selection changed to line {_currentLine}, start {_selectionStartCol}, end {_selectionEndCol}");
 	}
 
 	private async void OnTextChanged()
@@ -287,7 +287,6 @@ public partial class SharpIdeCodeEdit : CodeEdit
 			//_syntaxHighlighter.UpdateCache();
 			SyntaxHighlighter = null;
 			SyntaxHighlighter = _syntaxHighlighter; // Reassign to trigger redraw
-			GD.Print("Provided syntax highlighting");
 		}).CallDeferred();
 	}
 
