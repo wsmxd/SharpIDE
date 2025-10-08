@@ -119,6 +119,7 @@ public partial class SharpIdeCodeEdit : CodeEdit
 		});
 	}
 
+	// TODO: This is now significantly slower, invoke -> text updated in editor
 	private void OnCodeFixSelected(long id)
 	{
 		GD.Print($"Code fix selected: {id}");
