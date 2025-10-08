@@ -29,6 +29,7 @@ public sealed class IdeFileWatcher : IDisposable
 		fileWatcher.OnCreated += OnEvent;
 		fileWatcher.OnDeleted += OnEvent;
 		fileWatcher.OnRenamed += OnEvent;
+		fileWatcher.OnError += static (s, e) => Console.WriteLine($"FileSystemWatcher: Error - {e.GetException().Message}");
 
 		fileWatcher.Start();
 		_fileWatcher = fileWatcher;
