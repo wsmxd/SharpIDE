@@ -1,6 +1,8 @@
 ﻿using Godot;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.Shared.Extensions;
 using Microsoft.CodeAnalysis.Shared.Utilities;
+using Roslyn.Utilities;
 
 namespace SharpIDE.Godot.Features.CodeEditor;
 
@@ -35,8 +37,6 @@ public static class SymbolInfoComponents
         label.Newline(); // TODO: Make this only 1.5 lines high
         label.Newline(); //
         label.AddTypeParameterArguments(methodSymbol);
-        label.AddHr(100, 1, CachedColors.Gray);
-        label.Newline();
         label.Pop(); // font
         label.AddDocs(methodSymbol);
         label.Pop(); // default white
@@ -258,15 +258,86 @@ public static class SymbolInfoComponents
             }
         }
     }
+    
+    private static void AddXmlDocFragment(this RichTextLabel label, string xmlFragment)
+    {
+        if (string.IsNullOrWhiteSpace(xmlFragment)) return;
+        XmlFragmentParser.ParseFragment(xmlFragment, static (reader, label) =>
+        {
+            if (reader.NodeType == System.Xml.XmlNodeType.Text)
+            {
+                label.AddText(reader.Value);
+            }
+            else if (reader is { NodeType: System.Xml.XmlNodeType.Element, Name: DocumentationCommentXmlNames.SeeElementName })
+            {
+                var cref = reader.GetAttribute(DocumentationCommentXmlNames.CrefAttributeName);
+                if (cref is not null)
+                {
+                    var minimalTypeName = cref.Split('.').Last(); // may be suboptimal for anything other than T
+                    var typeColour = cref[0] switch
+                    {
+                        'N' => CachedColors.KeywordBlue,
+                        'T' => CachedColors.ClassGreen,
+                        'F' => CachedColors.White,
+                        'P' => CachedColors.White,
+                        'M' => CachedColors.Yellow,
+                        'E' => CachedColors.White,
+                        _ => CachedColors.Orange
+                    };
+                    label.PushMeta("TODO", RichTextLabel.MetaUnderline.OnHover);
+                        label.PushColor(typeColour);
+                            //label.AddText(cref.TrimStart('!', ':')); // remove !: prefix
+                            label.AddText(minimalTypeName);
+                        label.Pop();
+                    label.Pop(); // meta
+                }
+            }
+            else if (reader is { NodeType: System.Xml.XmlNodeType.Element, Name: DocumentationCommentXmlNames.TypeParameterReferenceElementName })
+            {
+                var name = reader.GetAttribute(DocumentationCommentXmlNames.NameAttributeName);
+                if (name is not null)
+                {
+                    label.PushColor(CachedColors.ClassGreen);
+                        label.AddText(name);
+                    label.Pop();
+                }
+            }
+            else if (reader is { NodeType: System.Xml.XmlNodeType.Element, Name: DocumentationCommentXmlNames.ParameterReferenceElementName })
+            {
+                var name = reader.GetAttribute(DocumentationCommentXmlNames.NameAttributeName);
+                if (name is not null)
+                {
+                    label.PushColor(CachedColors.VariableBlue);
+                        label.AddText(name);
+                    label.Pop();
+                }
+            }
+            else if (reader is { NodeType: System.Xml.XmlNodeType.Element })
+            {
+                var nameOrCref =  reader.GetAttribute(DocumentationCommentXmlNames.CrefAttributeName) ?? reader.GetAttribute(DocumentationCommentXmlNames.NameAttributeName);
+                if (nameOrCref is not null)
+                {
+                    label.PushColor(CachedColors.White);
+                    label.AddText(nameOrCref);
+                    label.Pop();
+                }
+            }
+
+            reader.Read();
+        }, label);
+    }
 
     private static void AddDocs(this RichTextLabel label, IMethodSymbol methodSymbol)
     {
         var xmlDocs = methodSymbol.GetDocumentationCommentXml();
         if (string.IsNullOrWhiteSpace(xmlDocs)) return;
+        label.AddHr(100, 1, CachedColors.Gray);
+        label.Newline();
         var docComment = DocumentationComment.FromXmlFragment(xmlDocs);
         if (docComment.SummaryText is not null)
         {
-            label.AddText(docComment.SummaryText);
+            label.AddXmlDocFragment(docComment.SummaryText);
+            //label.AddText(docComment.SummaryText);
             label.Newline();
         }
         label.PushTable(2);
