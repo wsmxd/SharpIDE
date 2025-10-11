@@ -258,7 +258,7 @@ public static class SymbolInfoComponents
             }
         }
     }
-    
+
     private static void AddDocs(this RichTextLabel label, IMethodSymbol methodSymbol)
     {
         var xmlDocs = methodSymbol.GetDocumentationCommentXml();
@@ -273,7 +273,9 @@ public static class SymbolInfoComponents
         if (docComment.ParameterNames.Length is not 0)
         {
             label.PushCell();
-            label.AddText("Params:");
+            label.PushColor(CachedColors.Gray);
+            label.AddText("Params: ");
+            label.Pop();
             label.Pop();
             foreach (var (index, parameterName) in docComment.ParameterNames.Index())
             {
@@ -297,7 +299,9 @@ public static class SymbolInfoComponents
         if (docComment.TypeParameterNames.Length is not 0)
         {
             label.PushCell();
-            label.AddText("Type Params:");
+            label.PushColor(CachedColors.Gray);
+            label.AddText("Type Params: ");
+            label.Pop();
             label.Pop();
             foreach (var (index, typeParameterName) in docComment.TypeParameterNames.Index())
             {
@@ -320,17 +324,21 @@ public static class SymbolInfoComponents
         if (docComment.ReturnsText is not null)
         {
             label.PushCell();
-            label.AddText("Returns:");
+                label.PushColor(CachedColors.Gray);
+                    label.AddText("Returns: ");
+                label.Pop();
             label.Pop();
             label.PushCell();
-            label.AddText(docComment.ReturnsText);
+                label.AddText(docComment.ReturnsText);
             label.Pop(); // cell
         }
 
         if (docComment.ExceptionTypes.Length is not 0)
         {
             label.PushCell();
-            label.AddText("Exceptions:");
+                label.PushColor(CachedColors.Gray);
+                    label.AddText("Exceptions: ");
+                label.Pop();
             label.Pop();
             foreach (var (index, exceptionTypeName) in docComment.ExceptionTypes.Index())
             {
@@ -354,7 +362,9 @@ public static class SymbolInfoComponents
         if (docComment.RemarksText is not null)
         {
             label.PushCell();
-            label.AddText("Remarks:");
+                label.PushColor(CachedColors.Gray);
+                    label.AddText("Remarks: ");
+                label.Pop();
             label.Pop();
             label.PushCell();
             label.AddText(docComment.RemarksText);
