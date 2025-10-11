@@ -1,5 +1,6 @@
 ﻿using Godot;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.Shared.Utilities;
 
 namespace SharpIDE.Godot.Features.CodeEditor;
 
@@ -12,8 +13,10 @@ public static class SymbolInfoComponents
         label.FitContent = true;
         label.AutowrapMode = TextServer.AutowrapMode.Off;
         label.SetAnchorsPreset(Control.LayoutPreset.FullRect);
+        label.PushColor(CachedColors.White);
         label.PushFont(MonospaceFont);
         label.PushColor(CachedColors.KeywordBlue);
+        // TODO: Attributes
         label.AddText(methodSymbol.DeclaredAccessibility.GetAccessibilityString());
         label.Pop();
         label.AddText(" ");
@@ -35,8 +38,8 @@ public static class SymbolInfoComponents
         label.AddHr(100, 1, CachedColors.Gray);
         label.Newline();
         label.Pop(); // font
-        label.AddText("docs");
-
+        label.AddDocs(methodSymbol);
+        label.Pop(); // default white
         return label;
     }
     
@@ -254,6 +257,113 @@ public static class SymbolInfoComponents
                 label.Newline();
             }
         }
+    }
+    
+    private static void AddDocs(this RichTextLabel label, IMethodSymbol methodSymbol)
+    {
+        var xmlDocs = methodSymbol.GetDocumentationCommentXml();
+        if (string.IsNullOrWhiteSpace(xmlDocs)) return;
+        var docComment = DocumentationComment.FromXmlFragment(xmlDocs);
+        if (docComment.SummaryText is not null)
+        {
+            label.AddText(docComment.SummaryText);
+            label.Newline();
+        }
+        label.PushTable(2);
+        if (docComment.ParameterNames.Length is not 0)
+        {
+            label.PushCell();
+            label.AddText("Params:");
+            label.Pop();
+            foreach (var (index, parameterName) in docComment.ParameterNames.Index())
+            {
+                var parameterText = docComment.GetParameterText(parameterName);
+                if (parameterText is null) continue;
+                label.PushCell();
+                label.PushColor(CachedColors.VariableBlue);
+                label.AddText(parameterName);
+                label.Pop();
+                label.AddText(" - ");
+                label.AddText(parameterText);
+                label.Pop(); // cell
+                if (index < docComment.ParameterNames.Length - 1)
+                {
+                    label.PushCell();
+                    label.Pop();
+                }
+            }
+        }
+
+        if (docComment.TypeParameterNames.Length is not 0)
+        {
+            label.PushCell();
+            label.AddText("Type Params:");
+            label.Pop();
+            foreach (var (index, typeParameterName) in docComment.TypeParameterNames.Index())
+            {
+                var typeParameterText = docComment.GetTypeParameterText(typeParameterName);
+                if (typeParameterText is null) continue;
+                label.PushCell();
+                label.PushColor(CachedColors.ClassGreen);
+                label.AddText(typeParameterName);
+                label.Pop();
+                label.AddText(" - ");
+                label.AddText(typeParameterText);
+                label.Pop(); // cell
+                if (index < docComment.TypeParameterNames.Length - 1)
+                {
+                    label.PushCell();
+                    label.Pop();
+                }
+            }
+        }
+        if (docComment.ReturnsText is not null)
+        {
+            label.PushCell();
+            label.AddText("Returns:");
+            label.Pop();
+            label.PushCell();
+            label.AddText(docComment.ReturnsText);
+            label.Pop(); // cell
+        }
+
+        if (docComment.ExceptionTypes.Length is not 0)
+        {
+            label.PushCell();
+            label.AddText("Exceptions:");
+            label.Pop();
+            foreach (var (index, exceptionTypeName) in docComment.ExceptionTypes.Index())
+            {
+                var exceptionText = docComment.GetExceptionTexts(exceptionTypeName).FirstOrDefault();
+                if (exceptionText is null) continue;
+                label.PushCell();
+                label.PushColor(CachedColors.InterfaceGreen);
+                label.AddText(exceptionTypeName);
+                label.Pop();
+                label.AddText(" - ");
+                label.AddText(exceptionText);
+                label.Pop(); // cell
+                if (index < docComment.ExceptionTypes.Length - 1)
+                {
+                    label.PushCell();
+                    label.Pop();
+                }
+            }
+        }
+
+        if (docComment.RemarksText is not null)
+        {
+            label.PushCell();
+            label.AddText("Remarks:");
+            label.Pop();
+            label.PushCell();
+            label.AddText(docComment.RemarksText);
+            label.Pop(); // cell
+            label.PushCell();
+            label.Pop();
+        }
+        
+        label.Pop(); // table
     }
     
     // TODO: handle arrays etc, where there are multiple colours in one type

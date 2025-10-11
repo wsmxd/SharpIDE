@@ -496,13 +496,6 @@ public static class RoslynAnalysis
 			return null;
 		}
 
-		var documentationCommentXml = symbol.GetDocumentationCommentXml();
-		if (documentationCommentXml is not null)
-		{
-			var comment = DocumentationComment.FromXmlFragment(documentationCommentXml);
-			;
-		}
-
 		Console.WriteLine($"Symbol found: {symbol.Name} ({symbol.Kind}) - {symbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}");
 		return symbol;
 	}

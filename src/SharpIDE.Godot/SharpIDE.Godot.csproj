@@ -13,5 +13,14 @@
     <PackageReference Include="ObservableCollections" />
     <PackageReference Include="ObservableCollections.R3" />
     <PackageReference Include="R3" />
+    <PackageReference Include="IgnoresAccessChecksToGenerator">
+        <PrivateAssets>all</PrivateAssets>
+        <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+      <IgnoresAccessChecksTo Include="Microsoft.CodeAnalysis.Workspaces" />
+      <IgnoresAccessChecksToExcludeTypeName Include="System.Linq.RoslynEnumerableExtensions" />
   </ItemGroup>
 </Project>
