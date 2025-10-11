@@ -33,8 +33,7 @@ public static class SymbolInfoComponents
         label.Newline();
         label.AddText("in class ");
         label.AddContainingNamespaceAndClass(methodSymbol);
-        label.Newline(); // TODO: Make this only 1.5 lines high
-        label.Newline(); //
+        label.Newline();
         label.AddTypeParameterArguments(methodSymbol);
         label.Pop(); // font
         label.AddDocs(methodSymbol);
@@ -242,6 +241,7 @@ public static class SymbolInfoComponents
     private static void AddTypeParameterArguments(this RichTextLabel label, IMethodSymbol methodSymbol)
     {
         if (methodSymbol.TypeArguments.Length == 0) return;
+        label.Newline(); // TODO: Make this only 0.5 lines high
         var typeParameters = methodSymbol.TypeParameters;
         var typeArguments = methodSymbol.TypeArguments;
         if (typeParameters.Length != typeArguments.Length) throw new Exception("Type parameters and type arguments length mismatch.");
