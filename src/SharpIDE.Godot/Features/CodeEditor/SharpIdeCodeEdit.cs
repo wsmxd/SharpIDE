@@ -108,6 +108,7 @@ public partial class SharpIdeCodeEdit : CodeEdit
 		symbolNameHoverWindow.Transparent = true;
 		symbolNameHoverWindow.Borderless = true;
 		symbolNameHoverWindow.PopupWMHint = true;
+		symbolNameHoverWindow.PopupWindow = true;
 		symbolNameHoverWindow.MinimizeDisabled = true;
 		symbolNameHoverWindow.MaximizeDisabled = true;
 		
@@ -129,6 +130,7 @@ public partial class SharpIdeCodeEdit : CodeEdit
 		tooltipWindow.Transparent = true;
 		tooltipWindow.Borderless = true;
 		tooltipWindow.PopupWMHint = true;
+		tooltipWindow.PopupWindow = true;
 		tooltipWindow.MinimizeDisabled = true;
 		tooltipWindow.MaximizeDisabled = true;
 		
