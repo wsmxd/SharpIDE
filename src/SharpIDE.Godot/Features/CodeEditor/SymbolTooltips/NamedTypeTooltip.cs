@@ -55,7 +55,7 @@ public static partial class SymbolInfoComponents
     
     private static void AddInheritedTypes(this RichTextLabel label, INamedTypeSymbol symbol)
     {
-        if (symbol.BaseType is not null && symbol.BaseType.SpecialType != SpecialType.System_Object)
+        if (symbol.BaseType is not null && symbol.BaseType.SpecialType is not (SpecialType.System_Object or SpecialType.System_Enum))
         {
             label.AddText(" : ");
             label.AddType(symbol.BaseType);
