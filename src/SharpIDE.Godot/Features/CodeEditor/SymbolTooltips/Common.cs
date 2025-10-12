@@ -353,10 +353,60 @@ public static partial class SymbolInfoComponents
     
     private static void AddType(this RichTextLabel label, ITypeSymbol symbol)
     {
-        var colour = symbol.GetSymbolColourByType();
-        label.PushColor(colour);
+        _ = symbol switch
+        {
+            {SpecialType: not SpecialType.None} => label.AddSpecialType(symbol),
+            INamedTypeSymbol namedTypeSymbol => label.AddNamedType(namedTypeSymbol),
+            ITypeParameterSymbol typeParameterSymbol => label.AddTypeParameter(typeParameterSymbol),
+            _ => label.AddUnknownType(symbol)
+        };
+    }
+    
+    private static RichTextLabel AddUnknownType(this RichTextLabel label, ITypeSymbol symbol)
+    {
+        label.PushColor(CachedColors.Orange);
+        label.AddText("[UNKNOWN TYPE]");
         label.AddText(symbol.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat));
         label.Pop();
+        return label;
+    }
+
+    private static RichTextLabel AddSpecialType(this RichTextLabel label, ITypeSymbol symbol)
+    {
+        label.PushColor(CachedColors.KeywordBlue);
+        label.AddText(symbol.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat));
+        label.Pop();
+        return label;
+    }
+    
+    private static RichTextLabel AddNamedType(this RichTextLabel label, INamedTypeSymbol symbol)
+    {
+        label.PushMeta("TODO", RichTextLabel.MetaUnderline.OnHover);
+        var colour = symbol.GetSymbolColourByType();
+        label.PushColor(colour);
+        label.AddText(symbol.Name);
+        label.Pop();
+        if (symbol.TypeArguments.Length is not 0)
+        {
+            label.AddText("<");
+            for (var i = 0; i < symbol.TypeArguments.Length; i++)
+            {
+                var typeArg = symbol.TypeArguments[i];
+                label.AddType(typeArg);
+                if (i < symbol.TypeArguments.Length - 1) label.AddText(", ");
+            }
+            label.AddText(">");
+        }
+        label.Pop(); // meta
+        return label;
+    }
+
+    private static RichTextLabel AddTypeParameter(this RichTextLabel label, ITypeParameterSymbol symbol)
+    {
+        label.PushColor(CachedColors.ClassGreen);
+        label.AddText(symbol.Name);
+        label.Pop();
+        return label;
     }
     
     // TODO: handle arrays etc, where there are multiple colours in one type

@@ -55,10 +55,8 @@ public static partial class SymbolInfoComponents
             label.Pop();
             return;
         }
-
-        label.PushColor(CachedColors.ClassGreen);
-        label.AddText(methodSymbol.ReturnType.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat));
-        label.Pop();
+        
+        label.AddType(methodSymbol.ReturnType);
     }
     
     private static void AddMethodName(this RichTextLabel label, IMethodSymbol methodSymbol)
@@ -204,7 +202,7 @@ public static partial class SymbolInfoComponents
         foreach (var (index, (typeArgument, typeParameter)) in methodSymbol.TypeArguments.Zip(typeParameters).Index())
         {
             label.PushColor(CachedColors.ClassGreen);
-            label.AddText(typeParameter.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat));
+            label.AddType(typeParameter);
             label.Pop();
             label.AddText(" is ");
             label.AddType(typeArgument);

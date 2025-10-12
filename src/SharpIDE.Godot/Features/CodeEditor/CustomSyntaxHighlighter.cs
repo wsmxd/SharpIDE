@@ -175,6 +175,8 @@ public partial class CustomHighlighter : SyntaxHighlighter
             "xml doc comment - delimiter" => CachedColors.CommentGreen,
             "xml doc comment - name" => CachedColors.White,
             "xml doc comment - text" => CachedColors.CommentGreen,
+            "xml doc comment - attribute name" => CachedColors.LightOrangeBrown,
+            "xml doc comment - attribute quotes" => CachedColors.LightOrangeBrown,
 
             // Misc
             "excluded code" => CachedColors.Gray,
