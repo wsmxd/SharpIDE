@@ -19,6 +19,7 @@ public static partial class SymbolInfoComponents
         label.AddVirtualModifier(symbol);
         label.AddAbstractModifier(symbol);
         label.AddOverrideModifier(symbol);
+        label.AddNamedTypeSymbolType(symbol);
         label.AddNamedTypeSymbolName(symbol);
         label.AddInheritedTypes(symbol);
         label.AddContainingNamespaceAndClass(symbol);
@@ -34,6 +35,22 @@ public static partial class SymbolInfoComponents
     private static void AddNamedTypeSymbolName(this RichTextLabel label, INamedTypeSymbol symbol)
     {
         label.AddType(symbol);
+    }
+    
+    private static void AddNamedTypeSymbolType(this RichTextLabel label, INamedTypeSymbol symbol)
+    {
+        label.PushColor(CachedColors.KeywordBlue);
+        switch (symbol.TypeKind)
+        {
+            case TypeKind.Class: label.AddText("class"); break;
+            case TypeKind.Struct: label.AddText("struct"); break;
+            case TypeKind.Interface: label.AddText("interface"); break;
+            case TypeKind.Enum: label.AddText("enum"); break;
+            case TypeKind.Delegate: label.AddText("delegate"); break;
+            default: label.AddText(symbol.TypeKind.ToString().ToLowerInvariant()); break;
+        }
+        label.Pop();
+        label.AddText(" ");
     }
     
     private static void AddInheritedTypes(this RichTextLabel label, INamedTypeSymbol symbol)
