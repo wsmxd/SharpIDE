@@ -9,7 +9,7 @@ public partial class SearchWindow : PopupPanel
     private LineEdit _lineEdit = null!;
     private VBoxContainer _searchResultsContainer = null!;
     public SharpIdeSolutionModel Solution { get; set; } = null!;
-	private readonly PackedScene _searchResultEntryScene = ResourceLoader.Load<PackedScene>("res://Features/Search/SearchResultComponent.tscn");
+	private readonly PackedScene _searchResultEntryScene = ResourceLoader.Load<PackedScene>("res://Features/Search/SearchInFiles/SearchResultComponent.tscn");
 
     private CancellationTokenSource _cancellationTokenSource = new();
     
