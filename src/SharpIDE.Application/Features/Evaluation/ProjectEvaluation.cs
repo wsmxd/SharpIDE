@@ -19,6 +19,17 @@ public static class ProjectEvaluation
 		return project;
 	}
 
+	public static async Task ReloadProject(string projectFilePath)
+	{
+		using var _ = SharpIdeOtel.Source.StartActivity($"{nameof(ProjectEvaluation)}.{nameof(ReloadProject)}");
+		Guard.Against.Null(projectFilePath, nameof(projectFilePath));
+
+		var project = _projectCollection.GetLoadedProjects(projectFilePath).Single();
+		var projectRootElement = project.Xml;
+		projectRootElement.Reload();
+		project.ReevaluateIfNecessary();
+	}
+
 	public static string? GetOutputDllFullPath(SharpIdeProjectModel projectModel)
 	{
 		var project = _projectCollection.GetLoadedProjects(projectModel.FilePath).Single();
