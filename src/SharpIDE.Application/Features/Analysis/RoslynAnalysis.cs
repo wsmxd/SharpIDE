@@ -34,7 +34,7 @@ namespace SharpIDE.Application.Features.Analysis;
 public static class RoslynAnalysis
 {
 	public static AdhocWorkspace? _workspace;
-	private static MSBuildProjectLoader? _msBuildProjectLoader;
+	private static CustomMsBuildProjectLoader? _msBuildProjectLoader;
 	private static RemoteSnapshotManager? _snapshotManager;
 	private static RemoteSemanticTokensLegendService? _semanticTokensLegendService;
 	private static SharpIdeSolutionModel? _sharpIdeSolutionModel;
@@ -74,7 +74,7 @@ public static class RoslynAnalysis
 
 			var host = MefHostServices.Create(container);
 			_workspace = new AdhocWorkspace(host);
-			_workspace.RegisterWorkspaceFailedHandler(o => throw new InvalidOperationException($"Workspace failed: {o.Diagnostic.Message}"));
+			_workspace.RegisterWorkspaceFailedHandler(o => Console.WriteLine($"Workspace failed: {o.Diagnostic.Message}"));
 
 			var snapshotManager = container.GetExports<RemoteSnapshotManager>().FirstOrDefault();
 			_snapshotManager = snapshotManager;
@@ -82,7 +82,7 @@ public static class RoslynAnalysis
 			_semanticTokensLegendService = container.GetExports<RemoteSemanticTokensLegendService>().FirstOrDefault();
 			_semanticTokensLegendService!.SetLegend(TokenTypeProvider.ConstructTokenTypes(false), TokenTypeProvider.ConstructTokenModifiers());
 
-			_msBuildProjectLoader = new MSBuildProjectLoader(_workspace);
+			_msBuildProjectLoader = new CustomMsBuildProjectLoader(_workspace);
 		}
 		using (var ___ = SharpIdeOtel.Source.StartActivity("OpenSolution"))
 		{
@@ -175,6 +175,91 @@ public static class RoslynAnalysis
 		_workspace.AddSolution(newSolutionInfo);
 		___?.Dispose();
 		Console.WriteLine("RoslynAnalysis: Solution reloaded");
+	}
+
+	/// Callers should call UpdateSolutionDiagnostics after this
+	/// Ensure that the SharpIdeSolutionModel has been updated before calling this and any subsequent calls
+	public static async Task ReloadProject(SharpIdeProjectModel projectModel, CancellationToken cancellationToken = default)
+	{
+		Console.WriteLine($"RoslynAnalysis: Reloading Project {projectModel.FilePath}");
+		using var _ = SharpIdeOtel.Source.StartActivity($"{nameof(RoslynAnalysis)}.{nameof(ReloadSolution)}");
+		await _solutionLoadedTcs.Task;
+		Guard.Against.Null(_workspace, nameof(_workspace));
+		Guard.Against.Null(_msBuildProjectLoader, nameof(_msBuildProjectLoader));
+
+		await BuildService.Instance.MsBuildAsync(_sharpIdeSolutionModel!.FilePath, BuildType.Restore, cancellationToken);
+		var __ = SharpIdeOtel.Source.StartActivity($"{nameof(RoslynAnalysis)}.{nameof(MSBuildProjectLoader)}.{nameof(MSBuildProjectLoader.LoadProjectInfoAsync)}");
+
+		var thisProject = _workspace.CurrentSolution.Projects.Single(s => s.FilePath == projectModel.FilePath);
+
+		// we can reliably rely on the Solution's graph of project inter-references, as a project has only been reloaded - no projects have been added or removed from the solution
+		var dependentProjects = _workspace.CurrentSolution.GetProjectDependencyGraph().GetProjectsThatTransitivelyDependOnThisProject(thisProject.Id);
+		var projectPathsToReload = dependentProjects.Select(id => _workspace.CurrentSolution.GetProject(id)!.FilePath!).Append(thisProject.FilePath!).Distinct().ToList();
+		//var projectMap = ProjectMap.Create(_workspace.CurrentSolution); // using a projectMap may speed up LoadProjectInfosAsync, TODO: test
+		// This will get all projects necessary to build this group of projects, regardless of whether those projects are actually affected by the original project change
+		// We can potentially optimise this, but given this is the expensive part, lets just proceed with reloading them all in the solution
+		// We potentially lose performance because Workspace/Solution caches are dropped, but lets not prematurely optimise
+		var loadedProjectInfos = await _msBuildProjectLoader.LoadProjectInfosAsync(projectPathsToReload, null, cancellationToken: cancellationToken);
+		__?.Dispose();
+
+		var ___ = SharpIdeOtel.Source.StartActivity($"{nameof(RoslynAnalysis)}.Workspace.asdf");
+
+		var oldProjectIdFilePathMap = _workspace.CurrentSolution.Projects.ToDictionary(keySelector: static p => (p.FilePath!, p.Name), elementSelector: static p => p.Id);
+
+		var projectIdMap = loadedProjectInfos.ToDictionary(
+			keySelector: static info => info.Id,
+			elementSelector: info => oldProjectIdFilePathMap[(info.FilePath!, info.Name)]);
+
+		// When we "reload" a project, we assume: no projects have been removed from the solution, and none added (TODO: Consider/handle a project gaining a project reference to a project outside of the solution)
+		// Therefore, loadedProjectInfos ⊆ (is a subset of) _workspace.CurrentSolution.Projects
+		// The ProjectIds will not match however, so we need to match on FilePath
+		// Since the ProjectIds don't match, we also need to remap all ProjectReferences to the existing ProjectIds
+		// same for documents
+		var projectInfosToUpdateWith = loadedProjectInfos.Select(loadedProjectInfo =>
+		{
+			var existingProject = _workspace.CurrentSolution.Projects.Single(p => p.FilePath == loadedProjectInfo.FilePath);
+			var projectInfo = loadedProjectInfo
+				.WithId(existingProject.Id)
+				.WithDocuments(MapDocuments(_workspace.CurrentSolution, existingProject.Id, loadedProjectInfo.Documents))
+				.WithProjectReferences(loadedProjectInfo.ProjectReferences.Select(MapProjectReference))
+				.WithAdditionalDocuments(MapDocuments(_workspace.CurrentSolution, existingProject.Id, loadedProjectInfo.AdditionalDocuments))
+				.WithAnalyzerConfigDocuments(MapDocuments(_workspace.CurrentSolution, existingProject.Id, loadedProjectInfo.AnalyzerConfigDocuments));
+			return projectInfo;
+		}).ToList();
+
+		var newSolution = _workspace.CurrentSolution;
+		foreach (var projectInfo in projectInfosToUpdateWith)
+		{
+			newSolution = newSolution.WithProjectInfo(projectInfo);
+		}
+		// Doesn't raise a workspace change event, for now we don't care?
+		_workspace.SetCurrentSolution(newSolution);
+
+		// We should potentially use the below instead of SetCurrentSolution, as it is async, and potentially has better locking semantics
+		// I think we will run into this imminently, when we handle multiple rapid project reloads
+		// await _workspace.SetCurrentSolutionAsync(true,
+		// 	transformation: oldSolution =>
+		// 	{
+		// 		// Move above code in here
+		// 		return oldSolution;
+		// 	},
+		// 	changeKind: (oldSln, newSln) => (WorkspaceChangeKind.SolutionChanged, null, null),
+		// 	null, null, cancellationToken
+		// );
+
+		_workspace.UpdateReferencesAfterAdd();
+
+		___?.Dispose();
+		Console.WriteLine("RoslynAnalysis: Project reloaded");
+		return;
+		ProjectReference MapProjectReference(ProjectReference oldRef) => new ProjectReference(projectIdMap[oldRef.ProjectId], oldRef.Aliases, oldRef.EmbedInteropTypes);
+
+		static ImmutableArray<DocumentInfo> MapDocuments(Solution oldSolution, ProjectId mappedProjectId, IReadOnlyList<DocumentInfo> documents)
+			=> documents.Select(docInfo =>
+			{
+				var mappedDocumentId = oldSolution.GetDocumentIdsWithFilePath(docInfo.FilePath).Single(id => id.ProjectId == mappedProjectId);
+				return docInfo.WithId(mappedDocumentId);
+			}).ToImmutableArray();
 	}
 
 	public static async Task UpdateSolutionDiagnostics()

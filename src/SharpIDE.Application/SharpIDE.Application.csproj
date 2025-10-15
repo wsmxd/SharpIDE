@@ -8,15 +8,16 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <IgnoresAccessChecksTo Include="Microsoft.CodeAnalysis.Remote.Razor" />
-    <IgnoresAccessChecksTo Include="Microsoft.CodeAnalysis.Razor.Workspaces" />
-    <IgnoresAccessChecksTo Include="Microsoft.CodeAnalysis.Razor.Compiler" />
-    <IgnoresAccessChecksTo Include="Microsoft.VisualStudioCode.RazorExtension" />
-    <IgnoresAccessChecksTo Include="Microsoft.CodeAnalysis.LanguageServer.Protocol" />
-    <IgnoresAccessChecksTo Include="Microsoft.CodeAnalysis.ExternalAccess.Razor.Features" />
-    <IgnoresAccessChecksTo Include="Microsoft.CodeAnalysis.Razor.SemanticTokens" />
-    <IgnoresAccessChecksTo Include="Microsoft.CodeAnalysis.Workspaces" />
-    <IgnoresAccessChecksToExcludeTypeName Include="System.Linq.RoslynEnumerableExtensions" />
+    <Publicize Include="Microsoft.CodeAnalysis.Remote.Razor" />
+    <Publicize Include="Microsoft.CodeAnalysis.Razor.Workspaces" />
+    <Publicize Include="Microsoft.CodeAnalysis.Razor.Compiler" />
+    <Publicize Include="Microsoft.VisualStudioCode.RazorExtension" />
+    <Publicize Include="Microsoft.CodeAnalysis.LanguageServer.Protocol" />
+    <Publicize Include="Microsoft.CodeAnalysis.ExternalAccess.Razor.Features" />
+    <Publicize Include="Microsoft.CodeAnalysis.Razor.SemanticTokens" />
+    <Publicize Include="Microsoft.CodeAnalysis.Workspaces" />
+    <Publicize Include="Microsoft.CodeAnalysis.Workspaces.MSBuild" />
+    <DoNotPublicize Include="Microsoft.CodeAnalysis.Workspaces:System.Linq.RoslynEnumerableExtensions" />
   </ItemGroup>
 
   <ItemGroup>
@@ -31,7 +32,7 @@
     <PackageReference Include="Microsoft.Build" ExcludeAssets="runtime" />
     <PackageReference Include="Microsoft.Build.Framework" ExcludeAssets="runtime" />
     <PackageReference Include="Microsoft.Build.Locator" />
-    <PackageReference Include="IgnoresAccessChecksToGenerator">
+    <PackageReference Include="Krafs.Publicizer">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
