@@ -17,19 +17,19 @@ public partial class CustomHighlighter : SyntaxHighlighter
     private System.Collections.Generic.Dictionary<int, ImmutableArray<SharpIdeClassifiedSpan>> _classifiedSpansByLine = [];
     
     
-    public void SetHighlightingData(IEnumerable<SharpIdeClassifiedSpan> classifiedSpans, IEnumerable<SharpIdeRazorClassifiedSpan> razorClassifiedSpans)
+    public void SetHighlightingData(ImmutableArray<SharpIdeClassifiedSpan> classifiedSpans, ImmutableArray<SharpIdeRazorClassifiedSpan> razorClassifiedSpans)
     {
         // separate each line here
         var razorSpansForLine = razorClassifiedSpans
             .Where(s => s.Span.Length is not 0)
-            .GroupBy(s => s.Span.LineIndex)
-            .ToList();
-        _razorClassifiedSpansByLine = razorSpansForLine.ToDictionary(g => g.Key, g => g.ToImmutableArray());
+            .GroupBy(s => s.Span.LineIndex);
         
+        _razorClassifiedSpansByLine = razorSpansForLine.ToDictionary(g => g.Key, g => g.ToImmutableArray());
+
         var spansGroupedByFileSpan = classifiedSpans
             .Where(s => s.ClassifiedSpan.TextSpan.Length is not 0)
-            .GroupBy(span => span.FileSpan.Start.Line)
-            .ToList();
+            .GroupBy(span => span.FileSpan.Start.Line);
+        
         _classifiedSpansByLine = spansGroupedByFileSpan.ToDictionary(g => g.Key, g => g.ToImmutableArray());
     }
 
