@@ -9,7 +9,6 @@ namespace SharpIDE.Application.Features.FilePersistence;
 /// Holds the in memory copies of files, and manages saving/loading them to/from disk.
 public class IdeOpenTabsFileManager
 {
-	public static IdeOpenTabsFileManager Instance { get; set; } = null!;
 	private ConcurrentDictionary<SharpIdeFile, Lazy<Task<string>>> _openFiles = new();
 
 	/// Implicitly 'opens' a file if not already open, and returns the text.

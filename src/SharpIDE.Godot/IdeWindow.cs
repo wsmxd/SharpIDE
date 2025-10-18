@@ -47,6 +47,7 @@ public partial class IdeWindow : Control
         // PrintOrphanNodes();
     }
     
+    // TODO: Problematic, as this is called even when the focus shifts to an embedded subwindow, such as a popup 
     private void OnFocusExited()
     {
         _ = Task.GodotRun(async () => await _openTabsFileManager.SaveAllOpenFilesAsync());
