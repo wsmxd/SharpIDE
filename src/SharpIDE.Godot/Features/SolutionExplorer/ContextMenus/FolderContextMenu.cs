@@ -45,7 +45,7 @@ public partial class SolutionExplorerPanel
             }
             else if (actionId is FolderContextMenuOptions.Delete)
             {
-                var confirmedTcs = new TaskCompletionSource<bool>();
+                var confirmedTcs = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
                 var confirmationDialog = new ConfirmationDialog();
                 confirmationDialog.Title = "Delete";
                 confirmationDialog.DialogText = $"Delete '{folder.Name}' file?";

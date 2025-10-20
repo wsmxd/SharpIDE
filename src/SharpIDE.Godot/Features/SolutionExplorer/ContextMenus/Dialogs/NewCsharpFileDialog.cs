@@ -73,12 +73,13 @@ public partial class NewCsharpFileDialog : ConfirmationDialog
 
         _ = Task.GodotRun(async () =>
         {
-           await _ideFileOperationsService.CreateCsFile(ParentNode, fileName);
+           var sharpIdeFile = await _ideFileOperationsService.CreateCsFile(ParentNode, fileName);
+           GodotGlobalEvents.Instance.FileExternallySelected.InvokeParallelFireAndForget(sharpIdeFile, null);
         });
         QueueFree();
     }
     
-    private bool IsNameInvalid(string name)
+    private static bool IsNameInvalid(string name)
     {
         return string.IsNullOrWhiteSpace(name);
     }

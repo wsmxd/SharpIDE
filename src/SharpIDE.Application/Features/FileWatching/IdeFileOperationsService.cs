@@ -26,14 +26,15 @@ public class IdeFileOperationsService(SharpIdeSolutionModificationService sharpI
 		await _sharpIdeSolutionModificationService.RemoveFile(file);
 	}
 
-	public async Task CreateCsFile(IFolderOrProject parentNode, string newFileName)
+	public async Task<SharpIdeFile> CreateCsFile(IFolderOrProject parentNode, string newFileName)
 	{
 		var newFilePath = Path.Combine(GetFileParentNodePath(parentNode), newFileName);
 		var className = Path.GetFileNameWithoutExtension(newFileName);
 		var @namespace = NewFileTemplates.ComputeNamespace(parentNode);
 		var fileText = NewFileTemplates.CsharpClass(className, @namespace);
 		await File.WriteAllTextAsync(newFilePath, fileText);
-		await _sharpIdeSolutionModificationService.CreateFile(parentNode, newFilePath, newFileName, fileText);
+		var sharpIdeFile = await _sharpIdeSolutionModificationService.CreateFile(parentNode, newFilePath, newFileName, fileText);
+		return sharpIdeFile;
 	}
 
 	private static string GetFileParentNodePath(IFolderOrProject parentNode) => parentNode switch
