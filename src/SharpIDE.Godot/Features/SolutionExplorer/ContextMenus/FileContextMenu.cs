@@ -1,6 +1,7 @@
 ﻿using Godot;
 using SharpIDE.Application.Features.SolutionDiscovery;
 using SharpIDE.Application.Features.SolutionDiscovery.VsPersistence;
+using SharpIDE.Godot.Features.SolutionExplorer.ContextMenus.Dialogs;
 
 namespace SharpIDE.Godot.Features.SolutionExplorer;
 
@@ -9,11 +10,13 @@ file enum FileContextMenuOptions
     Open = 0,
     RevealInFileExplorer = 1,
     CopyFullPath = 2,
-    Delete = 3
+    Rename = 3,
+    Delete = 4
 }
 
 public partial class SolutionExplorerPanel
 {
+    private readonly PackedScene _renameFileDialogScene = GD.Load<PackedScene>("uid://b775b5j4rkxxw");
     private void OpenContextMenuFile(SharpIdeFile file)
     {
         var menu = new PopupMenu();
@@ -23,6 +26,7 @@ public partial class SolutionExplorerPanel
         menu.AddSeparator();
         menu.AddItem("Copy Full Path", (int)FileContextMenuOptions.CopyFullPath);
         menu.AddSeparator();
+        menu.AddItem("Rename", (int)FileContextMenuOptions.Rename);
         menu.AddItem("Delete", (int)FileContextMenuOptions.Delete);
         if (file.Parent is SharpIdeSolutionFolder) menu.SetItemDisabled((int)FileContextMenuOptions.Delete, true);
         menu.PopupHide += () => menu.QueueFree();
@@ -40,6 +44,13 @@ public partial class SolutionExplorerPanel
             else if (actionId is FileContextMenuOptions.CopyFullPath)
             {
                 DisplayServer.ClipboardSet(file.Path);
+            }
+            else if (actionId is FileContextMenuOptions.Rename)
+            {
+                var renameFileDialog = _renameFileDialogScene.Instantiate<RenameFileDialog>();
+                renameFileDialog.File = file;
+                AddChild(renameFileDialog);
+                renameFileDialog.PopupCentered();
             }
             else if (actionId is FileContextMenuOptions.Delete)
             {
