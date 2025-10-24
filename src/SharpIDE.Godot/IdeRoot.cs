@@ -51,7 +51,6 @@ public partial class IdeRoot : Control
 	{
 		GodotGlobalEvents.Instance = new GodotGlobalEvents();
 		GlobalEvents.Instance = new GlobalEvents();
-		BuildService.Instance = new BuildService(); // TODO: Sort out this mess with singletons, especially access across Application services
 	}
 
 	public override void _ExitTree()

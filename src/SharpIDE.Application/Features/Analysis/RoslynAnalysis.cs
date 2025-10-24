@@ -33,9 +33,10 @@ using DiagnosticSeverity = Microsoft.CodeAnalysis.DiagnosticSeverity;
 
 namespace SharpIDE.Application.Features.Analysis;
 
-public class RoslynAnalysis(ILogger<RoslynAnalysis> logger)
+public class RoslynAnalysis(ILogger<RoslynAnalysis> logger, BuildService buildService)
 {
 	private readonly ILogger<RoslynAnalysis> _logger = logger;
+	private readonly BuildService _buildService = buildService;
 
 	public static AdhocWorkspace? _workspace;
 	private static CustomMsBuildProjectLoader? _msBuildProjectLoader;
@@ -99,7 +100,7 @@ public class RoslynAnalysis(ILogger<RoslynAnalysis> logger)
 			//_msBuildProjectLoader!.LoadMetadataForReferencedProjects = true;
 
 			// MsBuildProjectLoader doesn't do a restore which is absolutely required for resolving PackageReferences, if they have changed. I am guessing it just reads from project.assets.json
-			await BuildService.Instance.MsBuildAsync(_sharpIdeSolutionModel.FilePath, BuildType.Restore, cancellationToken);
+			await _buildService.MsBuildAsync(_sharpIdeSolutionModel.FilePath, BuildType.Restore, cancellationToken);
 			var solutionInfo = await _msBuildProjectLoader!.LoadSolutionInfoAsync(_sharpIdeSolutionModel.FilePath, cancellationToken: cancellationToken);
 			_workspace.ClearSolution();
 			var solution = _workspace.AddSolution(solutionInfo);
@@ -171,7 +172,7 @@ public class RoslynAnalysis(ILogger<RoslynAnalysis> logger)
 		Guard.Against.Null(_msBuildProjectLoader, nameof(_msBuildProjectLoader));
 
 		// It is important to note that a Workspace has no concept of MSBuild, nuget packages etc. It is just told about project references and "metadata" references, which are dlls. This is the what MSBuild does - it reads the csproj, and most importantly resolves nuget package references to dlls
-		await BuildService.Instance.MsBuildAsync(_sharpIdeSolutionModel!.FilePath, BuildType.Restore, cancellationToken);
+		await _buildService.MsBuildAsync(_sharpIdeSolutionModel!.FilePath, BuildType.Restore, cancellationToken);
 		var __ = SharpIdeOtel.Source.StartActivity($"{nameof(RoslynAnalysis)}.MSBuildProjectLoader.LoadSolutionInfoAsync");
 		// This call is the expensive part - MSBuild is slow. There doesn't seem to be any incrementalism for solutions.
 		// The best we could do to speed it up is do .LoadProjectInfoAsync for the single project, and somehow munge that into the existing solution
@@ -197,7 +198,7 @@ public class RoslynAnalysis(ILogger<RoslynAnalysis> logger)
 		Guard.Against.Null(_workspace, nameof(_workspace));
 		Guard.Against.Null(_msBuildProjectLoader, nameof(_msBuildProjectLoader));
 
-		await BuildService.Instance.MsBuildAsync(_sharpIdeSolutionModel!.FilePath, BuildType.Restore, cancellationToken);
+		await _buildService.MsBuildAsync(_sharpIdeSolutionModel!.FilePath, BuildType.Restore, cancellationToken);
 		var __ = SharpIdeOtel.Source.StartActivity($"{nameof(RoslynAnalysis)}.{nameof(CustomMsBuildProjectLoader)}.{nameof(CustomMsBuildProjectLoader.LoadProjectInfosAsync)}");
 
 		var thisProject = _workspace.CurrentSolution.Projects.Single(s => s.FilePath == projectModel.FilePath);

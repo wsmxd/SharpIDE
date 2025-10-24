@@ -3,6 +3,7 @@ using Ardalis.GuardClauses;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Logging;
+using Microsoft.Extensions.Logging;
 using SharpIDE.Application.Features.Logging;
 
 namespace SharpIDE.Application.Features.Build;
@@ -14,9 +15,10 @@ public enum BuildType
 	Clean,
 	Restore
 }
-public class BuildService
+public class BuildService(ILogger<BuildService> logger)
 {
-	public static BuildService Instance { get; set; } = null!;
+	private readonly ILogger<BuildService> _logger = logger;
+
 	public event Func<Task> BuildStarted = () => Task.CompletedTask;
 	public ChannelTextWriter BuildTextWriter { get; } = new ChannelTextWriter();
 	public async Task MsBuildAsync(string solutionOrProjectFilePath, BuildType buildType = BuildType.Build, CancellationToken cancellationToken = default)
@@ -54,11 +56,7 @@ public class BuildService
 		var timer = Stopwatch.StartNew();
 		var buildResult = await BuildManager.DefaultBuildManager.BuildAsync(buildParameters, buildRequest, cancellationToken).ConfigureAwait(false);
 		timer.Stop();
-		Console.WriteLine($"Build result: {buildResult.OverallResult} in {timer.ElapsedMilliseconds}ms");
-		if (buildResult.OverallResult != BuildResultCode.Success)
-		{
-			Console.WriteLine($"{buildResult.Exception}");
-		}
+		_logger.LogInformation(buildResult.Exception, "Build result: {BuildResult} in {ElapsedMilliseconds}ms", buildResult.OverallResult, timer.ElapsedMilliseconds);
 	}
 
 	private static string[] TargetsToBuild(BuildType buildType)
