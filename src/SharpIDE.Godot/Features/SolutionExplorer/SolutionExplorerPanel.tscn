@@ -1,4 +1,4 @@
-[gd_scene load_steps=7 format=3 uid="uid://cy1bb32g7j7dr"]
+[gd_scene load_steps=8 format=3 uid="uid://cy1bb32g7j7dr"]
 
 [ext_resource type="Script" uid="uid://bai53k7ongbxw" path="res://Features/SolutionExplorer/SolutionExplorerPanel.cs" id="1_gjy0r"]
 [ext_resource type="Texture2D" uid="uid://do0edciarrnp0" path="res://Features/SolutionExplorer/Resources/CsharpFile.svg" id="2_8ymw0"]
@@ -6,6 +6,27 @@
 [ext_resource type="Texture2D" uid="uid://bbfxltr1fcomt" path="res://Features/SolutionExplorer/Resources/SlnFolderIcon.svg" id="4_8ymw0"]
 [ext_resource type="Texture2D" uid="uid://cqt30ma6xgder" path="res://Features/SolutionExplorer/Resources/Csproj.svg" id="5_r1qfc"]
 [ext_resource type="Texture2D" uid="uid://btlxqx3c08fjj" path="res://Features/SolutionExplorer/Resources/SlnIcon.svg" id="6_idvpu"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_idvpu"]
+content_margin_left = 4.0
+content_margin_top = 4.0
+content_margin_right = 4.0
+content_margin_bottom = 4.0
+bg_color = Color(1, 1, 1, 0.75)
+draw_center = false
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+corner_detail = 5
+expand_margin_left = 1.0
+expand_margin_top = 1.0
+expand_margin_right = 1.0
+expand_margin_bottom = 1.0
 
 [node name="SolutionExplorerPanel" type="MarginContainer"]
 anchors_preset = 15
@@ -26,5 +47,7 @@ theme_override_colors/font_color = Color(0.830335, 0.830335, 0.830335, 1)
 theme_override_constants/v_separation = 1
 theme_override_constants/inner_item_margin_left = 2
 theme_override_constants/draw_guides = 0
+theme_override_styles/cursor = SubResource("StyleBoxFlat_idvpu")
+theme_override_styles/cursor_unfocused = SubResource("StyleBoxFlat_idvpu")
 allow_rmb_select = true
 select_mode = 2
