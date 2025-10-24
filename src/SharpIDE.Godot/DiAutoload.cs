@@ -1,6 +1,8 @@
 ﻿using Godot;
 using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using SharpIDE.Application.Features.Analysis;
 using SharpIDE.Application.Features.Build;
 using SharpIDE.Application.Features.FilePersistence;
@@ -33,6 +35,16 @@ public partial class DiAutoload : Node
         services.AddScoped<RoslynAnalysis>();
         services.AddScoped<IdeFileOperationsService>();
         services.AddScoped<SharpIdeSolutionModificationService>();
+        services.AddLogging(builder =>
+        {
+            builder.AddConsole();
+            builder.AddOpenTelemetry(logging =>
+            {
+                logging.IncludeFormattedMessage = true;
+                logging.IncludeScopes = true;
+            });
+        });
+        services.AddGodotOpenTelemetry();
 
         _serviceProvider = services.BuildServiceProvider();
         GetTree().NodeAdded += OnNodeAdded;

@@ -15,6 +15,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		Directory.Packages.props = Directory.Packages.props
 		NotesToUsers.md = NotesToUsers.md
 		.globalconfig = .globalconfig
+		nuget.config = nuget.config
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharpIDE.Photino", "src\SharpIDE.Photino\SharpIDE.Photino.csproj", "{E35167E1-0FF4-4194-97A8-CC95EDA224CD}"
