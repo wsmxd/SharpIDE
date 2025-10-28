@@ -258,6 +258,7 @@ public partial class SharpIdeCodeEdit : CodeEdit
 			_fileChangingSuppressBreakpointToggleEvent = true;
 			SetText(await readFileTask);
 			_fileChangingSuppressBreakpointToggleEvent = false;
+			ClearUndoHistory();
 			if (fileLinePosition is not null) SetFileLinePosition(fileLinePosition.Value);
 		});
 		_ = Task.GodotRun(async () =>
