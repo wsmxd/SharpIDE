@@ -169,7 +169,7 @@ public class FileChangedService(RoslynAnalysis roslynAnalysis, IdeOpenTabsFileMa
 		var oldCts = Interlocked.Exchange(ref _updateSolutionDiagnosticsCts, newCts);
 		await oldCts.CancelAsync();
 		oldCts.Dispose();
-		await _roslynAnalysis.MoveDocument(file, oldFilePath);
+		await _roslynAnalysis.RenameDocument(file, oldFilePath);
 		GlobalEvents.Instance.SolutionAltered.InvokeParallelFireAndForget();
 		await _roslynAnalysis.UpdateSolutionDiagnostics(newCts.Token);
 	}
