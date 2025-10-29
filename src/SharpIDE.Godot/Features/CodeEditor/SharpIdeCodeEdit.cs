@@ -14,6 +14,7 @@ using SharpIDE.Application.Features.Debugging;
 using SharpIDE.Application.Features.Events;
 using SharpIDE.Application.Features.FilePersistence;
 using SharpIDE.Application.Features.FileWatching;
+using SharpIDE.Application.Features.NavigationHistory;
 using SharpIDE.Application.Features.Run;
 using SharpIDE.Application.Features.SolutionDiscovery;
 using SharpIDE.Application.Features.SolutionDiscovery.VsPersistence;
@@ -54,6 +55,7 @@ public partial class SharpIdeCodeEdit : CodeEdit
     [Inject] private readonly IdeCodeActionService _ideCodeActionService = null!;
     [Inject] private readonly FileChangedService _fileChangedService = null!;
     [Inject] private readonly IdeApplyCompletionService _ideApplyCompletionService = null!;
+    [Inject] private readonly IdeNavigationHistoryService _navigationHistoryService = null!;
 
     private readonly List<string> _codeCompletionTriggers =
     [
@@ -341,9 +343,20 @@ public partial class SharpIdeCodeEdit : CodeEdit
 	// 	return base._FilterCodeCompletionCandidates(candidates);
 	// }
 
+	// This only gets invoked if the Node is focused
 	public override void _GuiInput(InputEvent @event)
 	{
-		if (@event is InputEventKey { Pressed: true } keyEvent)
+		if (@event is InputEventMouseButton { Pressed: true } mouseEvent)
+		{
+			var (col, line) = GetLineColumnAtPos((Vector2I)mouseEvent.Position);
+			var current = _navigationHistoryService.Current;
+			if (current!.File != _currentFile) throw new InvalidOperationException("Current navigation history file does not match the focused code editor file.");
+			if (current.LinePosition.Line != line) // Only record a new navigation if the line has changed
+			{
+				_navigationHistoryService.RecordNavigation(_currentFile, new SharpIdeFileLinePosition(line, col));
+			}
+		}
+		else if (@event is InputEventKey { Pressed: true } keyEvent)
 		{
 			var codeCompletionSelectedIndex = GetCodeCompletionSelectedIndex();
 			var isCodeCompletionPopupOpen = codeCompletionSelectedIndex is not -1;
