@@ -57,13 +57,23 @@ public partial class CodeEditorPanel : MarginContainer
 
     private void OnTabClicked(long tab)
     {
-        var sharpIdeFile = _tabContainer.GetChild<SharpIdeCodeEdit>((int)tab).SharpIdeFile;
-        GodotGlobalEvents.Instance.FileExternallySelected.InvokeParallelFireAndForget(sharpIdeFile, null);
+        var sharpIdeCodeEdit = _tabContainer.GetChild<SharpIdeCodeEdit>((int)tab);
+        var sharpIdeFile = sharpIdeCodeEdit.SharpIdeFile;
+        var caretLinePosition = new SharpIdeFileLinePosition(sharpIdeCodeEdit.GetCaretLine(), sharpIdeCodeEdit.GetCaretColumn());
+        GodotGlobalEvents.Instance.FileExternallySelected.InvokeParallelFireAndForget(sharpIdeFile, caretLinePosition);
     }
 
     private void OnTabClosePressed(long tabIndex)
     {
         var tab = _tabContainer.GetChild<Control>((int)tabIndex);
+        var previousSibling = _tabContainer.GetChildOrNull<SharpIdeCodeEdit>((int)tabIndex - 1);
+        if (previousSibling is not null)
+        {
+            var sharpIdeFile = previousSibling.SharpIdeFile;
+            var caretLinePosition = new SharpIdeFileLinePosition(previousSibling.GetCaretLine(), previousSibling.GetCaretColumn());
+            // This isn't actually necessary - closing a tab automatically selects the previous tab, however we need to do it to select the file in sln explorer, record navigation event etc
+            GodotGlobalEvents.Instance.FileExternallySelected.InvokeParallelFireAndForget(sharpIdeFile, caretLinePosition);
+        }
         _tabContainer.RemoveChild(tab);
         tab.QueueFree();
     }
