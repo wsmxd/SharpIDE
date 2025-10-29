@@ -29,6 +29,13 @@ public class IdeNavigationHistoryService
 		_forwardStack.Clear();
 	}
 
+	public void ClearHistory()
+	{
+		_backStack.Clear();
+		_forwardStack.Clear();
+		_current = null;
+	}
+
 	public void GoBack()
 	{
 		if (!CanGoBack) throw new InvalidOperationException("Cannot go back, no history available.");

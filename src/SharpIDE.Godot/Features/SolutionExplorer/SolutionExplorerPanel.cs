@@ -104,7 +104,6 @@ public partial class SolutionExplorerPanel : MarginContainer
 				_tree.QueueRedraw();
 			});
 		}
-		_navigationHistoryService.RecordNavigation(file, fileLinePosition ?? new SharpIdeFileLinePosition(0, 0));
 		await task.ConfigureAwait(false);
 	}
 	

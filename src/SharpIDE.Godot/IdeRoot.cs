@@ -6,6 +6,7 @@ using SharpIDE.Application.Features.Build;
 using SharpIDE.Application.Features.Events;
 using SharpIDE.Application.Features.FilePersistence;
 using SharpIDE.Application.Features.FileWatching;
+using SharpIDE.Application.Features.NavigationHistory;
 using SharpIDE.Application.Features.Run;
 using SharpIDE.Application.Features.SolutionDiscovery;
 using SharpIDE.Application.Features.SolutionDiscovery.VsPersistence;
@@ -47,6 +48,7 @@ public partial class IdeRoot : Control
     [Inject] private readonly IdeOpenTabsFileManager _openTabsFileManager = null!;
     [Inject] private readonly RoslynAnalysis _roslynAnalysis = null!;
     [Inject] private readonly SharpIdeSolutionModificationService _sharpIdeSolutionModificationService = null!;
+    [Inject] private readonly IdeNavigationHistoryService _navigationHistoryService = null!;
     [Inject] private readonly ILogger<IdeRoot> _logger = null!;
 
 	public override void _EnterTree()
@@ -131,6 +133,7 @@ public partial class IdeRoot : Control
 	private async Task OnSolutionExplorerPanelOnFileSelected(SharpIdeFile file, SharpIdeFileLinePosition? fileLinePosition)
 	{
 		await _codeEditorPanel.SetSharpIdeFile(file, fileLinePosition);
+		_navigationHistoryService.RecordNavigation(file, fileLinePosition ?? new SharpIdeFileLinePosition(0, 0));
 	}
 
 	public void SetSlnFilePath(string path)
@@ -167,6 +170,7 @@ public partial class IdeRoot : Control
 				{
 					await GodotGlobalEvents.Instance.FileExternallySelected.InvokeParallelAsync(file, linePosition);
 				}
+				_navigationHistoryService.ClearHistory();
 				// Select the selected tab
 				var selectedFile = filesToOpen.SingleOrDefault(f => f.IsSelected);
 				if (selectedFile.Item1 is not null) await GodotGlobalEvents.Instance.FileExternallySelected.InvokeParallelAsync(selectedFile.Item1, selectedFile.Item2);

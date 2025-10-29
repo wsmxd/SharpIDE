@@ -5,12 +5,12 @@
 [node name="ForwardBackwardButtonContainer" type="HBoxContainer"]
 script = ExtResource("1_vep4b")
 
-[node name="ForwardButton" type="Button" parent="."]
+[node name="BackwardButton" type="Button" parent="."]
 layout_mode = 2
 size_flags_vertical = 4
 text = " < "
 
-[node name="BackwardButton" type="Button" parent="."]
+[node name="ForwardButton" type="Button" parent="."]
 layout_mode = 2
 size_flags_vertical = 4
 text = " > "
