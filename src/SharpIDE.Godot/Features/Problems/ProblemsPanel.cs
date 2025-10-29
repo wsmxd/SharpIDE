@@ -112,16 +112,13 @@ public partial class ProblemsPanel : Control
         var parentTreeItem = selected.GetParent();
         var projectContainer = parentTreeItem.GetMetadata(0).As<RefCountedContainer<SharpIdeProjectModel>?>();
         if (projectContainer is null) return;
-        var projectModel = projectContainer.Item;
-        OpenDocumentContainingDiagnostic(diagnostic, projectModel);
+        OpenDocumentContainingDiagnostic(diagnostic);
     }
     
-    private static void OpenDocumentContainingDiagnostic(Diagnostic diagnostic, SharpIdeProjectModel projectModel)
+    private void OpenDocumentContainingDiagnostic(Diagnostic diagnostic)
     {
-        // TODO: probably store a flat list of all files in each project to avoid recursion
-        var file = projectModel.Files
-            .Concat(projectModel.Folders.SelectMany(f => f.GetAllFiles()))
-            .Single(s => s.Path == diagnostic.Location.SourceTree?.GetMappedLineSpan(diagnostic.Location.SourceSpan).Path);
+        var filePath = diagnostic.Location.SourceTree?.GetMappedLineSpan(diagnostic.Location.SourceSpan).Path;
+        var file = Solution!.AllFiles.Single(f => f.Path == filePath);
         GodotGlobalEvents.Instance.FileExternallySelected.InvokeParallelFireAndForget(file, null);
     }
 }
