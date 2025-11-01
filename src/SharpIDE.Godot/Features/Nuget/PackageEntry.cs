@@ -45,7 +45,7 @@ public partial class PackageEntry : MarginContainer
         if (PackageResult is null) return;
         _packageNameLabel.Text = PackageResult.PackageSearchMetadata.Identity.Id;
         _currentVersionLabel.Text = string.Empty;
-        //_latestVersionLabel.Text = $"Latest: {PackageResult.PackageSearchMetadata.vers.LatestVersion}";
+        _latestVersionLabel.Text = PackageResult.PackageSearchMetadata.Identity.Version.ToNormalizedString();
         _sourceNamesContainer.QueueFreeChildren();
 
         _ = Task.GodotRun(async () =>
