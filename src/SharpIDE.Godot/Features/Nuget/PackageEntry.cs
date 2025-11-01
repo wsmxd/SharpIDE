@@ -28,7 +28,7 @@ public partial class PackageEntry : MarginContainer
         Source_5_Color
     ];
 
-    public event Action<IdePackageResult> PackageSelected = null!;
+    public event Func<IdePackageResult, Task> PackageSelected = null!;
     
     [Inject] private readonly NugetPackageIconCacheService _nugetPackageIconCacheService = null!;
     
@@ -42,7 +42,7 @@ public partial class PackageEntry : MarginContainer
         _sourceNamesContainer = GetNode<HBoxContainer>("%SourceNamesHBoxContainer");
         _packageIconTextureRect = GetNode<TextureRect>("%PackageIconTextureRect");
         ApplyValues();
-        _button.Pressed += () => PackageSelected?.Invoke(PackageResult);
+        _button.Pressed += async () => await PackageSelected.Invoke(PackageResult);
     }
     
     private void ApplyValues()
@@ -58,18 +58,10 @@ public partial class PackageEntry : MarginContainer
         _ = Task.GodotRun(async () =>
         {
             var (iconBytes, iconFormat) = await _nugetPackageIconCacheService.GetNugetPackageIcon(PackageResult.PackageId, PackageResult.PackageFromSources.First().PackageSearchMetadata.IconUrl);
-            var image = new Image();
-            var error = iconFormat switch
+            var imageTexture = ImageTextureHelper.GetImageTextureFromBytes(iconBytes, iconFormat);
+            if (imageTexture is not null)
             {
-                NugetPackageIconFormat.Png => image.LoadPngFromBuffer(iconBytes),
-                NugetPackageIconFormat.Jpg => image.LoadJpgFromBuffer(iconBytes),
-                _ => Error.FileUnrecognized
-            };
-            if (error is Error.Ok)
-            {
-                image.Resize(32, 32, Image.Interpolation.Lanczos); // Probably should cache resized images instead
-                var loadedImageTexture = ImageTexture.CreateFromImage(image);
-                await this.InvokeAsync(() => _packageIconTextureRect.Texture = loadedImageTexture);
+                await this.InvokeAsync(() => _packageIconTextureRect.Texture = imageTexture);
             }
         });
         

@@ -51,9 +51,9 @@ public partial class NugetPanel : Control
         });
     }
 
-    private void OnPackageSelected(IdePackageResult packageResult)
+    private async Task OnPackageSelected(IdePackageResult packageResult)
     {
         _selectedPackage = packageResult;
-        _nugetPackageDetails.Visible = true;
+        await _nugetPackageDetails.SetPackage(packageResult);
     }
 }
