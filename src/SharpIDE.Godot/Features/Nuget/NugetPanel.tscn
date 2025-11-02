@@ -51,9 +51,30 @@ split_offset = 600
 [node name="VBoxContainer" type="VBoxContainer" parent="VBoxContainer/MarginContainer2/HSplitContainer"]
 layout_mode = 2
 
-[node name="LineEdit" type="LineEdit" parent="VBoxContainer/MarginContainer2/HSplitContainer/VBoxContainer"]
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer/MarginContainer2/HSplitContainer/VBoxContainer"]
 layout_mode = 2
+
+[node name="LineEdit" type="LineEdit" parent="VBoxContainer/MarginContainer2/HSplitContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
 placeholder_text = "Search for a package"
+
+[node name="OptionButton" type="OptionButton" parent="VBoxContainer/MarginContainer2/HSplitContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+selected = 0
+fit_to_longest_item = false
+item_count = 1
+popup/item_0/text = "Solution"
+popup/item_0/id = 0
+
+[node name="CheckButton" type="CheckButton" parent="VBoxContainer/MarginContainer2/HSplitContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9490196, 0.5137255, 0.4, 1)
+theme_override_colors/font_focus_color = Color(0.9490196, 0.5137255, 0.4, 1)
+theme_override_colors/font_pressed_color = Color(0.9490196, 0.5137255, 0.4, 1)
+theme_override_colors/font_hover_color = Color(0.96862745, 0.70980394, 0.6392157, 1)
+theme_override_colors/font_hover_pressed_color = Color(0.96862745, 0.70980394, 0.6392157, 1)
+text = "Prerelease"
 
 [node name="ScrollContainer" type="ScrollContainer" parent="VBoxContainer/MarginContainer2/HSplitContainer/VBoxContainer"]
 layout_mode = 2
