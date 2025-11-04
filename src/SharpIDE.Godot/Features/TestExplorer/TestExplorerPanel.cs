@@ -73,11 +73,11 @@ public partial class TestExplorerPanel : Control
             await _buildService.MsBuildAsync(solution.FilePath);
             await this.InvokeAsync(() => _testNodesVBoxContainer.QueueFreeChildren());
             _testNodeEntryNodes.Clear();
-            await _testRunnerService.RunTestsAsync(solution, Func);
+            await _testRunnerService.RunTestsAsync(solution, HandleTestNodeUpdates);
         });
     }
 
-    private async Task Func(TestNodeUpdate[] nodeUpdates)
+    private async Task HandleTestNodeUpdates(TestNodeUpdate[] nodeUpdates)
     {
         // Receive node updates - could be discovery, running, success, failed, skipped, etc
         await this.InvokeAsync(() =>
