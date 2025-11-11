@@ -14,7 +14,7 @@ public static class NugetDependencyGraph
 	{
 		var parentMap = new Dictionary<string, List<Dependent>>(StringComparer.OrdinalIgnoreCase);
 
-		var target = assetsFile.Targets.SingleOrDefault();
+		var target = assetsFile.Targets.SingleOrDefault(s => s.RuntimeIdentifier is null);
 		if (target == null) return parentMap;
 
 		var packageLibraries = target.Libraries.ToList();
