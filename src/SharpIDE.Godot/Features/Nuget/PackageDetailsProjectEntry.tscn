@@ -38,6 +38,7 @@ expand_mode = 3
 [node name="ProjectNameLabel" type="Label" parent="HBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2
+size_flags_horizontal = 3
 theme_override_colors/font_color = Color(0.83137256, 0.83137256, 0.83137256, 1)
 theme_override_font_sizes/font_size = 16
 text = "Application"
@@ -51,7 +52,6 @@ theme_override_colors/font_color = Color(0.6706895, 0.6706895, 0.6706895, 1)
 text = "1.12.0"
 
 [node name="Spacer" type="Control" parent="HBoxContainer"]
-visible = false
 layout_mode = 2
 size_flags_horizontal = 3
 
