@@ -19,3 +19,29 @@
 <img width="269" height="233" alt="image" src="https://github.com/user-attachments/assets/086de05a-c0bb-48d8-8e73-c0d4f8fca2da" />
 
 Done! ✨
+
+## Intro to Godot
+I recommend reading the [brief overview](https://docs.godotengine.org/en/stable/getting_started/introduction/key_concepts_overview.html) of Godot from their docs, however most simply, a Godot game/app is composed of scenes and nodes. A scene is simply a reusable arrangement of nodes. The main scene of SharpIDE is `IdeRoot.tscn`:
+
+<img width="1788" height="928" alt="image" src="https://github.com/user-attachments/assets/956e5694-c1b6-453a-8f7e-e663bc2d4aeb" />
+
+Another important concept with Godot is Scripts. A single script can be attached to a Node.
+You can tell that a script is attached to a node by the icon:
+
+<img width="565" height="88" alt="image" src="https://github.com/user-attachments/assets/6ca1efcc-7aed-42d3-9c22-8ee9fcf0ab1e" />
+
+And clicking the icon will open the script in Rider.
+
+<img width="768" height="317" alt="image" src="https://github.com/user-attachments/assets/020cd402-4929-4e95-9fbb-7e430a81f668" />
+
+Exploring the UI is easy - clicking anywhere on the actual UI Nodes will highlight the node/scene in the Scene Tree:
+
+<img width="378" height="431" alt="image" src="https://github.com/user-attachments/assets/506a1d83-dc08-4438-af74-112413a30438" />
+
+You can tell if a "node" is a scene by the icon:
+
+<img width="391" height="60" alt="image" src="https://github.com/user-attachments/assets/f8a64b72-cc53-486e-a0d4-52fecc08e6c8" />
+
+Clicking this icon will open the scene:
+
+<img width="260" height="53" alt="image" src="https://github.com/user-attachments/assets/20aecd46-f137-49bd-8023-69ebae7fa7db" />
