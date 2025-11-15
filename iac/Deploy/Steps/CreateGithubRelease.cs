@@ -60,11 +60,11 @@ public class CreateGithubRelease(IPipelineContext pipelineContext) : IStep
 		};
 		var linuxAsset = await github.Repository.Release.UploadAsset(release, linuxUpload, cancellationToken);
 
-		var macosReleaseDmg = await PipelineFileHelper.GitRootDirectory.GetFile("./artifacts/publish-godot/sharpide-osx-universal.dmg");
-		await using var macosStream = macosReleaseDmg.OpenRead();
+		var macosReleaseZip = await PipelineFileHelper.GitRootDirectory.GetFile("./artifacts/publish-godot/sharpide-osx-universal.zip");
+		await using var macosStream = macosReleaseZip.OpenRead();
 		var macosUpload = new ReleaseAssetUpload
 		{
-			FileName = $"sharpide-osx-universal-{versionString}.dmg",
+			FileName = $"sharpide-osx-universal-{versionString}.zip",
 			ContentType = "application/octet-stream",
 			RawData = macosStream
 		};
