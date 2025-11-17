@@ -12,7 +12,7 @@ dest_files=["res://.godot/imported/Nuget.svg-c9a0eefd4c46c6cc65cb44205e31ca0f.dp
 
 [params]
 
-base_scale=1.0
+base_scale=0.5
 saturation=1.0
 color_map={}
 compress=true

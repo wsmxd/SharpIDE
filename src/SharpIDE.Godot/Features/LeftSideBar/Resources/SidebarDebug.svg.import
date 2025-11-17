@@ -12,7 +12,7 @@ dest_files=["res://.godot/imported/SidebarDebug.svg-e03458145016aa2c2106ad2ce79b
 
 [params]
 
-base_scale=1.0
+base_scale=3.0
 saturation=1.0
 color_map={}
 compress=true

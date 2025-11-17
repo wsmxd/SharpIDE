@@ -12,7 +12,7 @@ dest_files=["res://.godot/imported/delegate-icon.svg-ebcb0bae119c58af821ab5c8c81
 
 [params]
 
-base_scale=1.0
+base_scale=0.2
 saturation=1.0
 color_map={}
 compress=true

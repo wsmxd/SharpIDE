@@ -12,7 +12,7 @@ dest_files=["res://.godot/imported/enum-icon.svg-ff57c384a88b5882f7415f6aa17c341
 
 [params]
 
-base_scale=1.0
+base_scale=0.2
 saturation=1.0
 color_map={}
 compress=true

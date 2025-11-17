@@ -12,7 +12,7 @@ dest_files=["res://.godot/imported/method-cube.svg-f18f050a8351a4b867e505f1010ca
 
 [params]
 
-base_scale=1.0
+base_scale=0.2
 saturation=1.0
 color_map={}
 compress=true

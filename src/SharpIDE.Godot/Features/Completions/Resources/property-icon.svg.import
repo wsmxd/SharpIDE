@@ -12,7 +12,7 @@ dest_files=["res://.godot/imported/property-icon.svg-092a13195816f83a7b3e9c7f331
 
 [params]
 
-base_scale=1.0
+base_scale=0.2
 saturation=1.0
 color_map={}
 compress=true

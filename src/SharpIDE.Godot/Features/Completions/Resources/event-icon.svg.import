@@ -12,7 +12,7 @@ dest_files=["res://.godot/imported/event-icon.svg-8e71c4d46d93b1117a9e34d4c1895e
 
 [params]
 
-base_scale=1.0
+base_scale=0.2
 saturation=1.0
 color_map={}
 compress=true
