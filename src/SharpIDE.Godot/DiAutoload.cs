@@ -52,6 +52,7 @@ public partial class DiAutoload : Node
         services.AddHttpClient();
         services.AddLogging(builder =>
         {
+            //builder.SetMinimumLevel(LogLevel.Trace);
             builder.AddConsole();
             builder.AddOpenTelemetry(logging =>
             {
