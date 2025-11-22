@@ -920,14 +920,21 @@ public class RoslynAnalysis(ILogger<RoslynAnalysis> logger, BuildService buildSe
 
 		var newText = oldText.WithChanges(sourceText.GetTextChanges(oldText));
 
-		var newSolution = fileModel switch
+		// We don't blow up if the document is not in the workspace - this would happen e.g. for files that are excluded.
+		// Roslyn implementations seem to handle this with a Misc Files workspace. TODO: Investigate
+		var currentSolution = _workspace!.CurrentSolution;
+		if (currentSolution.ContainsDocument(document.Id))
 		{
-			{ IsRazorFile: true } => _workspace.CurrentSolution.WithAdditionalDocumentText(document.Id, newText),
-			{ IsCsharpFile: true } => _workspace.CurrentSolution.WithDocumentText(document.Id, newText),
-			_ => throw new ArgumentOutOfRangeException()
-		};
-
-		_workspace.TryApplyChanges(newSolution);
+			_workspace.OnDocumentTextChanged(document.Id, newText, PreservationMode.PreserveIdentity, requireDocumentPresent: false);
+		}
+		else if (currentSolution.ContainsAdditionalDocument(document.Id))
+		{
+			_workspace.OnAdditionalDocumentTextChanged(document.Id, newText, PreservationMode.PreserveIdentity);
+		}
+		else if (currentSolution.ContainsAnalyzerConfigDocument(document.Id))
+		{
+			_workspace.OnAnalyzerConfigDocumentTextChanged(document.Id, newText, PreservationMode.PreserveIdentity);
+		}
 	}
 
 	public async Task AddDocument(SharpIdeFile fileModel, string content)
