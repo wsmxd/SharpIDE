@@ -1,4 +1,5 @@
-﻿using Microsoft.CodeAnalysis.Threading;
+﻿using Microsoft.CodeAnalysis.Shared.TestHooks;
+using Microsoft.CodeAnalysis.Threading;
 using Microsoft.VisualStudio.SolutionPersistence.Model;
 using SharpIDE.Application.Features.Analysis;
 using SharpIDE.Application.Features.Evaluation;
@@ -18,10 +19,19 @@ public enum FileChangeType
 	CompletionChange // Apply only in memory, as well as notify tabs of new content
 }
 
-public class FileChangedService(RoslynAnalysis roslynAnalysis, IdeOpenTabsFileManager openTabsFileManager)
+public class FileChangedService
 {
-	private readonly RoslynAnalysis _roslynAnalysis = roslynAnalysis;
-	private readonly IdeOpenTabsFileManager _openTabsFileManager = openTabsFileManager;
+	private readonly RoslynAnalysis _roslynAnalysis;
+	private readonly IdeOpenTabsFileManager _openTabsFileManager;
+	private readonly AsyncBatchingWorkQueue _updateSolutionDiagnosticsQueue;
+    public static readonly IAsynchronousOperationListener NullListener = new AsynchronousOperationListenerProvider.NullOperationListener();
+
+	public FileChangedService(RoslynAnalysis roslynAnalysis, IdeOpenTabsFileManager openTabsFileManager)
+	{
+		_roslynAnalysis = roslynAnalysis;
+		_openTabsFileManager = openTabsFileManager;
+		_updateSolutionDiagnosticsQueue = new AsyncBatchingWorkQueue(TimeSpan.FromMilliseconds(200), ProcessBatchAsync, NullListener, CancellationToken.None);
+	}
 
 	public SharpIdeSolutionModel SolutionModel { get; set; } = null!;
 
@@ -105,6 +115,11 @@ public class FileChangedService(RoslynAnalysis roslynAnalysis, IdeOpenTabsFileMa
 		await afterSaveTask;
 	}
 
+	private async ValueTask ProcessBatchAsync(CancellationToken cancellationToken)
+	{
+		await _roslynAnalysis.UpdateSolutionDiagnostics(cancellationToken);
+	}
+
 	private CancellationSeries _updateSolutionDiagnosticsCtSeries = new();
 	private async Task HandleCsprojChanged(SharpIdeFile file)
 	{
@@ -114,7 +129,7 @@ public class FileChangedService(RoslynAnalysis roslynAnalysis, IdeOpenTabsFileMa
 		await ProjectEvaluation.ReloadProject(file.Path);
 		await _roslynAnalysis.ReloadProject(project, CancellationToken.None);
 		GlobalEvents.Instance.SolutionAltered.InvokeParallelFireAndForget();
-		await _roslynAnalysis.UpdateSolutionDiagnostics(newCts);
+		_updateSolutionDiagnosticsQueue.AddWork();
 	}
 
 	private async Task HandleWorkspaceFileChanged(SharpIdeFile file, string newContents)
@@ -122,7 +137,7 @@ public class FileChangedService(RoslynAnalysis roslynAnalysis, IdeOpenTabsFileMa
 		var newCts = _updateSolutionDiagnosticsCtSeries.CreateNext();
 		await _roslynAnalysis.UpdateDocument(file, newContents);
 		GlobalEvents.Instance.SolutionAltered.InvokeParallelFireAndForget();
-		await _roslynAnalysis.UpdateSolutionDiagnostics(newCts);
+		_updateSolutionDiagnosticsQueue.AddWork();
 	}
 
 	private async Task HandleWorkspaceFileAdded(SharpIdeFile file, string contents)
@@ -130,7 +145,7 @@ public class FileChangedService(RoslynAnalysis roslynAnalysis, IdeOpenTabsFileMa
 		var newCts = _updateSolutionDiagnosticsCtSeries.CreateNext();
 		await _roslynAnalysis.AddDocument(file, contents);
 		GlobalEvents.Instance.SolutionAltered.InvokeParallelFireAndForget();
-		await _roslynAnalysis.UpdateSolutionDiagnostics(newCts);
+		_updateSolutionDiagnosticsQueue.AddWork();
 	}
 
 	private async Task HandleWorkspaceFileRemoved(SharpIdeFile file)
@@ -138,7 +153,7 @@ public class FileChangedService(RoslynAnalysis roslynAnalysis, IdeOpenTabsFileMa
 		var newCts = _updateSolutionDiagnosticsCtSeries.CreateNext();
 		await _roslynAnalysis.RemoveDocument(file);
 		GlobalEvents.Instance.SolutionAltered.InvokeParallelFireAndForget();
-		await _roslynAnalysis.UpdateSolutionDiagnostics(newCts);
+		_updateSolutionDiagnosticsQueue.AddWork();
 	}
 
 	private async Task HandleWorkspaceFileMoved(SharpIdeFile file, string oldFilePath)
@@ -146,7 +161,7 @@ public class FileChangedService(RoslynAnalysis roslynAnalysis, IdeOpenTabsFileMa
 		var newCts = _updateSolutionDiagnosticsCtSeries.CreateNext();
 		await _roslynAnalysis.MoveDocument(file, oldFilePath);
 		GlobalEvents.Instance.SolutionAltered.InvokeParallelFireAndForget();
-		await _roslynAnalysis.UpdateSolutionDiagnostics(newCts);
+		_updateSolutionDiagnosticsQueue.AddWork();
 	}
 
 	private async Task HandleWorkspaceFileRenamed(SharpIdeFile file, string oldFilePath)
@@ -154,6 +169,6 @@ public class FileChangedService(RoslynAnalysis roslynAnalysis, IdeOpenTabsFileMa
 		var newCts = _updateSolutionDiagnosticsCtSeries.CreateNext();
 		await _roslynAnalysis.RenameDocument(file, oldFilePath);
 		GlobalEvents.Instance.SolutionAltered.InvokeParallelFireAndForget();
-		await _roslynAnalysis.UpdateSolutionDiagnostics(newCts);
+		_updateSolutionDiagnosticsQueue.AddWork();
 	}
 }
