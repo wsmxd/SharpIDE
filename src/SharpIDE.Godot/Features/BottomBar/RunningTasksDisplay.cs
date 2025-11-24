@@ -29,39 +29,17 @@ public partial class RunningTasksDisplay : HBoxContainer
         _activityMonitor.ActivityStarted.Unsubscribe(OnActivityStarted);
     }
 
-    private async Task OnActivityStarted(Activity activity)
+    private async Task OnActivityStarted(Activity activity) => await OnActivityChanged(activity, true);
+    private async Task OnActivityStopped(Activity activity) => await OnActivityChanged(activity, false);
+    private async Task OnActivityChanged(Activity activity, bool isOccurring)
     {
         if (activity.DisplayName == $"{nameof(RoslynAnalysis)}.{nameof(RoslynAnalysis.UpdateSolutionDiagnostics)}")
         {
-            _isSolutionDiagnosticsBeingRetrieved = true;
+            _isSolutionDiagnosticsBeingRetrieved = isOccurring;
         }
         else if (activity.DisplayName == "OpenSolution")
         {
-            _isSolutionLoading = true;
-        }
-        else
-        {
-            return;
-        }
-
-        var visible = _isSolutionDiagnosticsBeingRetrieved || _isSolutionLoading;
-        await this.InvokeAsync(() =>
-        {
-            _solutionLoadingLabel.Visible = _isSolutionLoading;
-            _solutionDiagnosticsLabel.Visible = _isSolutionDiagnosticsBeingRetrieved;
-            Visible = visible;
-        });
-    }
-    
-    private async Task OnActivityStopped(Activity activity)
-    {
-        if (activity.DisplayName == $"{nameof(RoslynAnalysis)}.{nameof(RoslynAnalysis.UpdateSolutionDiagnostics)}")
-        {
-            _isSolutionDiagnosticsBeingRetrieved = false;
-        }
-        else if (activity.DisplayName == "OpenSolution")
-        {
-            _isSolutionLoading = false;
+            _isSolutionLoading = isOccurring;
         }
         else
         {
