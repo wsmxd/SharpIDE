@@ -51,6 +51,7 @@ public partial class SharpIdeCodeEdit : CodeEdit
 	private bool _fileChangingSuppressBreakpointToggleEvent;
 	private bool _settingWholeDocumentTextSuppressLineEditsEvent; // A dodgy workaround - setting the whole document doesn't guarantee that the line count stayed the same etc. We are still going to have broken highlighting. TODO: Investigate getting minimal text change ranges, and change those ranges only
 	private bool _fileDeleted;
+	private IDisposable? _projectDiagnosticsObserveDisposable;
 	
     [Inject] private readonly IdeOpenTabsFileManager _openTabsFileManager = null!;
     [Inject] private readonly RunService _runService = null!;
@@ -151,6 +152,7 @@ public partial class SharpIdeCodeEdit : CodeEdit
 	{
 		_currentFile?.FileContentsChangedExternally.Unsubscribe(OnFileChangedExternally);
 		_currentFile?.FileDeleted.Unsubscribe(OnFileDeleted);
+		_projectDiagnosticsObserveDisposable?.Dispose();
 		GlobalEvents.Instance.SolutionAltered.Unsubscribe(OnSolutionAltered);
 		if (_currentFile is not null) _openTabsFileManager.CloseFile(_currentFile);
 	}
@@ -259,7 +261,7 @@ public partial class SharpIdeCodeEdit : CodeEdit
 		var project = ((IChildSharpIdeNode)_currentFile).GetNearestProjectNode();
 		if (project is not null)
 		{
-			project.Diagnostics.ObserveChanged()
+			_projectDiagnosticsObserveDisposable = project.Diagnostics.ObserveChanged()
 				.SubscribeAwait(async (innerEvent, ct) =>
 				{
 					var projectDiagnosticsForFile = project.Diagnostics.Where(s => s.FilePath == _currentFile.Path).ToImmutableArray();
