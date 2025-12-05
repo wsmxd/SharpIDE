@@ -12,16 +12,6 @@ namespace SharpIDE.Godot.Features.BottomPanel;
 
 public partial class BottomPanelManager : Panel
 {
-    public SharpIdeSolutionModel? Solution
-    {
-        get;
-        set
-        {
-            field = value;
-            _problemsPanel.Solution = value;
-        }
-    }
-
     private RunPanel _runPanel = null!;
     private DebugPanel _debugPanel = null!;
     private BuildPanel _buildPanel = null!;

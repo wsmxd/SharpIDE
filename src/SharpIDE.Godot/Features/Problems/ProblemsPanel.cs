@@ -4,7 +4,6 @@ using Microsoft.CodeAnalysis;
 using ObservableCollections;
 using R3;
 using SharpIDE.Application.Features.Analysis;
-using SharpIDE.Application.Features.SolutionDiscovery;
 using SharpIDE.Application.Features.SolutionDiscovery.VsPersistence;
 using SharpIDE.Godot.Features.Common;
 
@@ -18,8 +17,10 @@ public partial class ProblemsPanel : Control
     public Texture2D ErrorIcon { get; set; } = null!;
     [Export]
     public Texture2D CsprojIcon { get; set; } = null!;
+
+    private SharpIdeSolutionModel? _solution;
     
-    public SharpIdeSolutionModel? Solution { get; set; }
+    [Inject] private readonly SharpIdeSolutionAccessor _sharpIdeSolutionAccessor = null!;
     
 	private Tree _tree = null!;
     private TreeItem _rootItem = null!;
@@ -33,16 +34,16 @@ public partial class ProblemsPanel : Control
         _tree.ItemActivated += TreeOnItemActivated;
         _rootItem = _tree.CreateItem();
         _rootItem.SetText(0, "Problems");
-        Observable.EveryValueChanged(this, manager => manager.Solution)
-            .Where(s => s is not null)
-            .Subscribe(s =>
-            {
-                _projects.RemoveRange(_projects);
-                _projects.AddRange(s!.AllProjects);
-            }).AddTo(this);
         BindToTree(_projects);
+        _ = Task.GodotRun(AsyncReady);
     }
 
+    private async Task AsyncReady()
+    {
+        await _sharpIdeSolutionAccessor.SolutionReadyTcs.Task;
+        _solution = _sharpIdeSolutionAccessor.SolutionModel;
+        _projects.AddRange(_solution!.AllProjects);
+    }
 
     public void BindToTree(ObservableHashSet<SharpIdeProjectModel> list)
     {
@@ -195,14 +196,13 @@ public partial class ProblemsPanel : Control
         var parentTreeItem = selected.GetParent();
         var projectContainer = parentTreeItem.GetMetadata(0).As<RefCountedContainer<SharpIdeProjectModel>?>();
         if (projectContainer is null) return;
-        OpenDocumentContainingDiagnostic(diagnostic.Diagnostic);
+        OpenDocumentContainingDiagnostic(diagnostic);
     }
     
-    private void OpenDocumentContainingDiagnostic(Diagnostic diagnostic)
+    private void OpenDocumentContainingDiagnostic(SharpIdeDiagnostic diagnostic)
     {
-        var fileLinePositionSpan = diagnostic.Location.GetMappedLineSpan();
-        var file = Solution!.AllFiles[fileLinePositionSpan.Path];
-        var linePosition = new SharpIdeFileLinePosition(fileLinePositionSpan.StartLinePosition.Line, fileLinePositionSpan.StartLinePosition.Character);
+        var file = _solution!.AllFiles[diagnostic.FilePath];
+        var linePosition = new SharpIdeFileLinePosition(diagnostic.Span.Start.Line, diagnostic.Span.Start.Character);
         GodotGlobalEvents.Instance.FileExternallySelected.InvokeParallelFireAndForget(file, linePosition);
     }
 }
