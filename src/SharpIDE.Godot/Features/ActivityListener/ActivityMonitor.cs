@@ -6,8 +6,7 @@ namespace SharpIDE.Godot.Features.ActivityListener;
 
 public class ActivityMonitor
 {
-    public EventWrapper<Activity, Task> ActivityStarted { get; } = new(_ => Task.CompletedTask);
-    public EventWrapper<Activity, Task> ActivityStopped { get; } = new(_ => Task.CompletedTask);
+    public EventWrapper<Activity, Task> ActivityChanged { get; } = new(_ => Task.CompletedTask);
 
     public ActivityMonitor()
     {
@@ -15,8 +14,8 @@ public class ActivityMonitor
         {
             ShouldListenTo = source => source == SharpIdeOtel.Source,
             Sample = (ref ActivityCreationOptions<ActivityContext> _) => ActivitySamplingResult.PropagationData,
-            ActivityStarted = activity => ActivityStarted.InvokeParallelFireAndForget(activity),
-            ActivityStopped  = activity => ActivityStopped.InvokeParallelFireAndForget(activity),
+            ActivityStarted = activity => ActivityChanged.InvokeParallelFireAndForget(activity),
+            ActivityStopped  = activity => ActivityChanged.InvokeParallelFireAndForget(activity),
         };
 
         ActivitySource.AddActivityListener(listener);

@@ -23,21 +23,17 @@ public partial class RunningTasksDisplay : HBoxContainer
         _solutionLoadingLabel = GetNode<Label>("%SolutionLoadingLabel");
         _solutionDiagnosticsLabel = GetNode<Label>("%SolutionDiagnosticsLabel");
         Visible = false;
-        _activityMonitor.ActivityStarted.Subscribe(OnActivityStarted);
-        _activityMonitor.ActivityStopped.Subscribe(OnActivityStopped);
+        _activityMonitor.ActivityChanged.Subscribe(OnActivityChanged);
     }
 
     public override void _ExitTree()
     {
-        _activityMonitor.ActivityStarted.Unsubscribe(OnActivityStarted);
-        _activityMonitor.ActivityStopped.Unsubscribe(OnActivityStopped);
-        
+        _activityMonitor.ActivityChanged.Unsubscribe(OnActivityChanged);
     }
 
-    private async Task OnActivityStarted(Activity activity) => await OnActivityChanged(activity, true);
-    private async Task OnActivityStopped(Activity activity) => await OnActivityChanged(activity, false);
-    private async Task OnActivityChanged(Activity activity, bool isOccurring)
+    private async Task OnActivityChanged(Activity activity)
     {
+        var isOccurring = !activity.IsStopped;
         if (activity.DisplayName == $"{nameof(RoslynAnalysis)}.{nameof(RoslynAnalysis.UpdateSolutionDiagnostics)}")
         {
             _isSolutionDiagnosticsBeingRetrieved = isOccurring;
