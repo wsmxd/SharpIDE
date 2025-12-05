@@ -3,6 +3,7 @@ using Microsoft.Extensions.Hosting;
 using SharpIDE.Application.Features.Build;
 using SharpIDE.Godot.Features.IdeSettings;
 using SharpIDE.Godot.Features.SlnPicker;
+using Environment = System.Environment;
 
 namespace SharpIDE.Godot;
 
@@ -24,6 +25,8 @@ public partial class IdeWindow : Control
         GD.Print("IdeWindow _Ready called");
         ResourceLoader.LoadThreadedRequest(SlnPickerScenePath);
         ResourceLoader.LoadThreadedRequest(IdeRootScenePath);
+        // Godot doesn't have an easy equivalent of launchsettings.json, and we also want this to be set for published builds
+        Environment.SetEnvironmentVariable("MSBUILD_PARSE_SLN_WITH_SOLUTIONPERSISTENCE", "1");
         SharpIdeMsbuildLocator.Register();
         GodotOtelExtensions.AddServiceDefaults();
         Singletons.AppState = AppStateLoader.LoadAppStateFromConfigFile();
