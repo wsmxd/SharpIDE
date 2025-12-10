@@ -604,9 +604,9 @@ public class RoslynAnalysis(ILogger<RoslynAnalysis> logger, BuildService buildSe
 	}
 
 	// TODO: Pass in LinePositionSpan for refactorings that span multiple characters, e.g. extract method
-	public async Task<ImmutableArray<CodeAction>> GetCodeFixesForDocumentAtPosition(SharpIdeFile fileModel, LinePosition linePosition, CancellationToken cancellationToken = default)
+	public async Task<ImmutableArray<CodeAction>> GetCodeActionsForDocumentAtPosition(SharpIdeFile fileModel, LinePosition linePosition, CancellationToken cancellationToken = default)
 	{
-		using var _ = SharpIdeOtel.Source.StartActivity($"{nameof(RoslynAnalysis)}.{nameof(GetCodeFixesForDocumentAtPosition)}");
+		using var _ = SharpIdeOtel.Source.StartActivity($"{nameof(RoslynAnalysis)}.{nameof(GetCodeActionsForDocumentAtPosition)}");
 		await _solutionLoadedTcs.Task;
 		var document = await GetDocumentForSharpIdeFile(fileModel, cancellationToken);
 		Guard.Against.Null(document, nameof(document));
@@ -635,7 +635,10 @@ public class RoslynAnalysis(ILogger<RoslynAnalysis> logger, BuildService buildSe
 
 		var linePositionSpan = new LinePositionSpan(linePosition, new LinePosition(linePosition.Line, linePosition.Character + 1));
 		var selectedSpan = sourceText.Lines.GetTextSpan(linePositionSpan);
-		arrayBuilder.AddRange(await GetCodeRefactoringsAsync(document, selectedSpan, cancellationToken));
+
+		var codeRefactorings = await GetCodeRefactoringsAsync(document, selectedSpan, cancellationToken);
+		arrayBuilder.AddRange(codeRefactorings);
+
 		return arrayBuilder.ToImmutable();
 	}
 
@@ -679,6 +682,23 @@ public class RoslynAnalysis(ILogger<RoslynAnalysis> logger, BuildService buildSe
 	}
 
 	private static async Task<ImmutableArray<CodeAction>> GetCodeRefactoringsAsync(Document document, TextSpan span, CancellationToken cancellationToken = default)
+	{
+		var refactorings = await _codeRefactoringService!.GetRefactoringsAsync(
+			document,
+			span,
+			cancellationToken);
+
+		var codeActions = refactorings
+			.SelectMany(collection => collection.CodeActions)
+			.Where(s => s.action.NestedActions.Length is 0) // Currently, nested actions are not supported
+			.Select(s => s.action)
+			.ToImmutableArray();
+
+		return codeActions;
+	}
+
+	[Obsolete] // ICodeRefactoringService seems to return refactorings from DefaultAssemblies! Unlike ICodeFixService. Leaving for reference
+	private static async Task<ImmutableArray<CodeAction>> GetCodeRefactoringsFromDefaultAssembliesAsync(Document document, TextSpan span, CancellationToken cancellationToken = default)
 	{
 		var codeActions = new List<CodeAction>();
 		var refactorContext = new CodeRefactoringContext(

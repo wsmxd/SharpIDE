@@ -517,7 +517,7 @@ public partial class SharpIdeCodeEdit : CodeEdit
 		_ = Task.GodotRun(async () =>
 		{
 			var linePos = new LinePosition(caretLine, caretColumn);
-			var codeActions = await _roslynAnalysis.GetCodeFixesForDocumentAtPosition(_currentFile, linePos);
+			var codeActions = await _roslynAnalysis.GetCodeActionsForDocumentAtPosition(_currentFile, linePos);
 			await this.InvokeAsync(() =>
 			{
 				_popupMenu.Clear();
