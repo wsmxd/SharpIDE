@@ -28,8 +28,25 @@ public partial class ThreadsVariablesSubTab : Control
 		GlobalEvents.Instance.DebuggerExecutionStopped.Subscribe(OnDebuggerExecutionStopped);
 		_threadsTree.ItemSelected += OnThreadSelected;
 		_stackFramesTree.ItemSelected += OnStackFrameSelected;
+		Project.ProjectStoppedRunning.Subscribe(ProjectStoppedRunning);
 	}
-	
+
+	public override void _ExitTree()
+	{
+		GlobalEvents.Instance.DebuggerExecutionStopped.Unsubscribe(OnDebuggerExecutionStopped);
+		Project.ProjectStoppedRunning.Unsubscribe(ProjectStoppedRunning);
+	}
+
+	private async Task ProjectStoppedRunning()
+	{
+		await this.InvokeAsync(() =>
+		{
+			_threadsTree.Clear();
+			_stackFramesTree.Clear();
+			_variablesTree.Clear();
+		});
+	}
+
 	private async void OnThreadSelected()
 	{
 		var selectedItem = _threadsTree.GetSelected();
