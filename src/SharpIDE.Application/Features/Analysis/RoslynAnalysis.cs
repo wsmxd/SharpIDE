@@ -416,7 +416,7 @@ public partial class RoslynAnalysis(ILogger<RoslynAnalysis> logger, BuildService
 	public async Task<ImmutableArray<SharpIdeDiagnostic>> GetDocumentAnalyzerDiagnostics(SharpIdeFile fileModel, CancellationToken cancellationToken = default)
 	{
 		if (fileModel.IsRoslynWorkspaceFile is false) return [];
-		using var _ = SharpIdeOtel.Source.StartActivity($"{nameof(RoslynAnalysis)}.{nameof(GetDocumentDiagnostics)}");
+		using var _ = SharpIdeOtel.Source.StartActivity($"{nameof(RoslynAnalysis)}.{nameof(GetDocumentAnalyzerDiagnostics)}");
 		await _solutionLoadedTcs.Task;
 
 		var document = await GetDocumentForSharpIdeFile(fileModel, cancellationToken);
