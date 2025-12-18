@@ -25,13 +25,12 @@ public class FileChangedService
 	private readonly RoslynAnalysis _roslynAnalysis;
 	private readonly IdeOpenTabsFileManager _openTabsFileManager;
 	private readonly AsyncBatchingWorkQueue _updateSolutionDiagnosticsQueue;
-    public static readonly IAsynchronousOperationListener NullListener = new AsynchronousOperationListenerProvider.NullOperationListener();
 
 	public FileChangedService(RoslynAnalysis roslynAnalysis, IdeOpenTabsFileManager openTabsFileManager)
 	{
 		_roslynAnalysis = roslynAnalysis;
 		_openTabsFileManager = openTabsFileManager;
-		_updateSolutionDiagnosticsQueue = new AsyncBatchingWorkQueue(TimeSpan.FromMilliseconds(200), ProcessBatchAsync, NullListener, CancellationToken.None);
+		_updateSolutionDiagnosticsQueue = new AsyncBatchingWorkQueue(TimeSpan.FromMilliseconds(200), ProcessBatchAsync, IAsynchronousOperationListener.Instance, CancellationToken.None);
 	}
 
 	public SharpIdeSolutionModel SolutionModel { get; set; } = null!;
@@ -175,5 +174,14 @@ public class FileChangedService
 		await _roslynAnalysis.RenameDocument(file, oldFilePath);
 		GlobalEvents.Instance.SolutionAltered.InvokeParallelFireAndForget();
 		_updateSolutionDiagnosticsQueue.AddWork();
+	}
+}
+
+public static class NullOperationListenerExtensions
+{
+	private static readonly IAsynchronousOperationListener _nullOperationListener = new AsynchronousOperationListenerProvider.NullOperationListener();
+	extension(IAsynchronousOperationListener nullOperationListener)
+	{
+		public static IAsynchronousOperationListener Instance => _nullOperationListener;
 	}
 }

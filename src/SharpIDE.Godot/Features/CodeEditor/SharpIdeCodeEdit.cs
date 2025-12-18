@@ -3,6 +3,7 @@ using Godot;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CodeActions;
 using Microsoft.CodeAnalysis.Completion;
+using Microsoft.CodeAnalysis.Shared.TestHooks;
 using Microsoft.CodeAnalysis.Tags;
 using Microsoft.CodeAnalysis.Text;
 using Microsoft.CodeAnalysis.Threading;
@@ -47,6 +48,7 @@ public partial class SharpIdeCodeEdit : CodeEdit
 	private bool _settingWholeDocumentTextSuppressLineEditsEvent; // A dodgy workaround - setting the whole document doesn't guarantee that the line count stayed the same etc. We are still going to have broken highlighting. TODO: Investigate getting minimal text change ranges, and change those ranges only
 	private bool _fileDeleted;
 	private IDisposable? _projectDiagnosticsObserveDisposable;
+	private readonly AsyncBatchingWorkQueue _selectionChangedQueue;
 	
     [Inject] private readonly IdeOpenTabsFileManager _openTabsFileManager = null!;
     [Inject] private readonly RunService _runService = null!;
@@ -68,6 +70,11 @@ public partial class SharpIdeCodeEdit : CodeEdit
 		//"0", "1", "2", "3", "4", "5", "6", "7", "8", "9",
 	    "(", ",", "=", "\t", ":"
 	];
+
+	public SharpIdeCodeEdit()
+	{
+		_selectionChangedQueue = new AsyncBatchingWorkQueue(TimeSpan.FromMilliseconds(150), ProcessSelectionChanged, IAsynchronousOperationListener.Instance, CancellationToken.None);
+	}
 
 	public override void _Ready()
 	{
@@ -206,24 +213,35 @@ public partial class SharpIdeCodeEdit : CodeEdit
 		//SetSymbolLookupWordAsValid(valid);
 		SetSymbolLookupWordAsValid(true);
 	}
+
+	private async ValueTask ProcessSelectionChanged(CancellationToken cancellationToken)
+	{
+		if (cancellationToken.IsCancellationRequested) return;
+		string? selectedText = null;
+		await this.InvokeAsync(() =>
+		{
+			if (HasSelection() is false) return;
+			selectedText = GetSelectedText();
+		});
+		if (string.IsNullOrWhiteSpace(selectedText)) return;
+		var lineBreakCount = 0;
+		var slashRsToRemove = 0;
+			
+		foreach (var c in selectedText.AsSpan())
+		{
+			if (c is '\n') lineBreakCount++;
+			else if (c is '\r') slashRsToRemove++;
+		}
+		var charLength = selectedText.Length - lineBreakCount - slashRsToRemove;
+		_editorCaretPositionService.SelectionInfo = (charLength, lineBreakCount);
+	}
 	
 	private void OnCaretChanged()
 	{
 		var caretPosition = GetCaretPosition(startAt1: true);
 		if (HasSelection())
 		{
-			// Probably should be debounced
-			var selectedText = GetSelectedText();
-			var lineBreakCount = 0;
-			var slashRsToRemove = 0;
-			
-			foreach (var c in selectedText.AsSpan())
-			{
-				if (c is '\n') lineBreakCount++;
-				else if (c is '\r') slashRsToRemove++;
-			}
-			var charLength = selectedText.Length - lineBreakCount - slashRsToRemove;
-			_editorCaretPositionService.SelectionInfo = (charLength, lineBreakCount);
+			_selectionChangedQueue.AddWork();
 		}
 		else
 		{
