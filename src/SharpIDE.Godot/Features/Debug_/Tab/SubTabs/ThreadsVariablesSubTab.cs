@@ -41,11 +41,12 @@ public partial class ThreadsVariablesSubTab : Control
 		_variablesTree.ItemCollapsed += OnVariablesItemExpandedOrCollapsed;
 		Project.ProjectStoppedRunning.Subscribe(ClearAllTrees);
 	}
-	
-	//private readonly TextLine _textLine = new TextLine();
+
+	private static readonly Color VariableNameColor = new Color("f0ac81");
+	private static readonly Color VariableWhiteColor = new Color("d4d4d4");
+	private static readonly Color VariableTypeColor = new Color("70737a");
 	private void DebuggerVariableCustomDraw(TreeItem treeItem, Rect2 rect)
     {
-	    // variableItem.SetText(0, $$"""{{variable.Name}} = {{{variable.Type}}} {{variable.Value}}""");
 	    var variable = _variableReferenceLookup.GetValueOrDefault(treeItem);
 	    if (variable is null) return;
 	    
@@ -56,15 +57,15 @@ public partial class ThreadsVariablesSubTab : Control
 	    var currentX = rect.Position.X + padding;
 	    var textYPos = rect.Position.Y + (rect.Size.Y + fontSize) / 2 - 2;
 	    
-	    _variablesTree.DrawString(font, new Vector2(currentX, textYPos), variable.Name, HorizontalAlignment.Left, -1, fontSize, Colors.White);
+	    _variablesTree.DrawString(font, new Vector2(currentX, textYPos), variable.Name, HorizontalAlignment.Left, -1, fontSize, VariableNameColor);
 	    var variableNameDrawnSize = font.GetStringSize(variable.Name, HorizontalAlignment.Left, -1, fontSize).X;
 	    currentX += variableNameDrawnSize;
-	    _variablesTree.DrawString(font, new Vector2(currentX, textYPos), " = ", HorizontalAlignment.Left, -1, fontSize, Colors.White);
+	    _variablesTree.DrawString(font, new Vector2(currentX, textYPos), " = ", HorizontalAlignment.Left, -1, fontSize, VariableWhiteColor);
         currentX += font.GetStringSize(" = ", HorizontalAlignment.Left, -1, fontSize).X;
-        _variablesTree.DrawString(font, new Vector2(currentX, textYPos), $"{{{variable.Type}}} ", HorizontalAlignment.Left, -1, fontSize, Colors.Gray);
+        _variablesTree.DrawString(font, new Vector2(currentX, textYPos), $"{{{variable.Type}}} ", HorizontalAlignment.Left, -1, fontSize, VariableTypeColor);
 		var variableTypeDrawnSize = font.GetStringSize($"{{{variable.Type}}} ", HorizontalAlignment.Left, -1, fontSize).X;
 		currentX += variableTypeDrawnSize;
-		_variablesTree.DrawString(font, new Vector2(currentX, textYPos), variable.Value, HorizontalAlignment.Left, -1, fontSize, Colors.White);
+		_variablesTree.DrawString(font, new Vector2(currentX, textYPos), variable.Value, HorizontalAlignment.Left, -1, fontSize, VariableWhiteColor);
     }
 
 	private void OnVariablesItemExpandedOrCollapsed(TreeItem item)
