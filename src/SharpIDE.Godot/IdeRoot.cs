@@ -91,13 +91,27 @@ public partial class IdeRoot : Control
 		_cleanSlnButton.Pressed += OnCleanSlnButtonPressed;
 		_restoreSlnButton.Pressed += OnRestoreSlnButtonPressed;
 		_cancelMsBuildActionButton.Pressed += async () => await _buildService.CancelBuildAsync();
-		_buildService.BuildStarted.Subscribe(async () => await this.InvokeAsync(() => _cancelMsBuildActionButton.Disabled = false));
-		_buildService.BuildFinished.Subscribe(async () => await this.InvokeAsync(() => _cancelMsBuildActionButton.Disabled = true));
+		_buildService.BuildStarted.Subscribe(OnBuildStarted);
+		_buildService.BuildFinished.Subscribe(OnBuildFinished);
 		GodotGlobalEvents.Instance.BottomPanelVisibilityChangeRequested.Subscribe(async show => await this.InvokeAsync(() => _invertedVSplitContainer.InvertedSetCollapsed(!show)));
 		GetTree().GetRoot().FocusExited += OnFocusExited;
 		_nodeReadyTcs.SetResult();
 	}
-	
+
+	private async Task OnBuildStarted() => await OnBuildRunningStateChanged(true);
+	private async Task OnBuildFinished() => await OnBuildRunningStateChanged(false);
+	private async Task OnBuildRunningStateChanged(bool running)
+	{
+		await this.InvokeAsync(() =>
+		{
+			_cancelMsBuildActionButton.Disabled = !running;
+			_buildSlnButton.Disabled = running;
+			_rebuildSlnButton.Disabled = running;
+			_cleanSlnButton.Disabled = running;
+			_restoreSlnButton.Disabled = running;
+		});
+	}
+
 	// TODO: Problematic, as this is called even when the focus shifts to an embedded subwindow, such as a popup 
 	private void OnFocusExited()
 	{
