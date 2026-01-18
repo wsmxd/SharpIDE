@@ -17,6 +17,8 @@ public enum BuildType
 	Restore
 }
 public enum BuildStartedFlags { UserFacing = 0, Internal }
+public enum SharpIdeBuildResult { Success = 0, Failure }
+
 public class BuildService(ILogger<BuildService> logger)
 {
 	private readonly ILogger<BuildService> _logger = logger;
@@ -25,7 +27,7 @@ public class BuildService(ILogger<BuildService> logger)
 	public EventWrapper<Task> BuildFinished { get; } = new(() => Task.CompletedTask);
 	public ChannelTextWriter BuildTextWriter { get; } = new ChannelTextWriter();
 	private CancellationTokenSource? _cancellationTokenSource;
-	public async Task MsBuildAsync(string solutionOrProjectFilePath, BuildType buildType = BuildType.Build, BuildStartedFlags buildStartedFlags = BuildStartedFlags.UserFacing, CancellationToken cancellationToken = default)
+	public async Task<SharpIdeBuildResult> MsBuildAsync(string solutionOrProjectFilePath, BuildType buildType = BuildType.Build, BuildStartedFlags buildStartedFlags = BuildStartedFlags.UserFacing, CancellationToken cancellationToken = default)
 	{
 		if (_cancellationTokenSource is not null) throw new InvalidOperationException("A build is already in progress.");
 		_cancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
@@ -63,6 +65,13 @@ public class BuildService(ILogger<BuildService> logger)
 		BuildFinished.InvokeParallelFireAndForget();
 		_cancellationTokenSource = null;
 		_logger.LogInformation(buildResult.Exception, "Build result: {BuildResult} in {ElapsedMilliseconds}ms", buildResult.OverallResult, timer.ElapsedMilliseconds);
+		var mappedResult = buildResult.OverallResult switch
+		{
+			BuildResultCode.Success => SharpIdeBuildResult.Success,
+			BuildResultCode.Failure => SharpIdeBuildResult.Failure,
+			_ => throw new ArgumentOutOfRangeException()
+		};
+		return mappedResult;
 	}
 
 	public async Task CancelBuildAsync()
