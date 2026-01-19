@@ -28,7 +28,7 @@ public partial class RunPanelTab : Control
 		{
 			await foreach (var array in Project.RunningOutputChannel!.Reader.ReadAllAsync().ConfigureAwait(false))
 			{
-				await _terminal.WriteAsync(array);
+				_terminal.Write(array);
 			}
 		});
 	}

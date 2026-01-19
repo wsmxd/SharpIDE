@@ -12,19 +12,18 @@ public partial class SharpIdeTerminal : Control
 		var terminalControl = GetNode<Control>("Terminal");
 		_terminal = new Terminal(terminalControl);
 	}
-	
-	[RequiresGodotUiThread]
+
 	public void Write(string text)
 	{
 		_terminal.Write(text);
 	}
 	
-	public async Task WriteAsync(byte[] text)
+	public void Write(byte[] text)
 	{
 		var (processedArray, length, wasRented) = ProcessLineEndings(text);
 		try
 		{
-			await this.InvokeAsync(() => _terminal.Write(processedArray.AsSpan(0, length)));
+			_terminal.Write(processedArray.AsSpan(0, length));
 		}
 		finally
 		{
@@ -36,7 +35,6 @@ public partial class SharpIdeTerminal : Control
 		_previousArrayEndedInCr = text.Length > 0 && text[^1] == (byte)'\r';
 	}
 
-	[RequiresGodotUiThread]
 	public void ClearTerminal()
 	{
 		// .Clear removes all text except for the bottom row, so lets make sure we have a blank line, and cursor at start
