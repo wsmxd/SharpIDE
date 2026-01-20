@@ -1,6 +1,7 @@
 ﻿using System.Collections.Concurrent;
 using Ardalis.GuardClauses;
 using Microsoft.Diagnostics.NETCore.Client;
+using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.Shared.VSCodeDebugProtocol;
 using Microsoft.VisualStudio.Shared.VSCodeDebugProtocol.Messages;
 using Newtonsoft.Json.Linq;
@@ -13,9 +14,11 @@ using SharpIDE.Application.Features.SolutionDiscovery.VsPersistence;
 namespace SharpIDE.Application.Features.Debugging;
 
 #pragma warning disable VSTHRD101
-public class DebuggingService
+public class DebuggingService(ILogger<DebuggingService> logger)
 {
 	private readonly ConcurrentDictionary<DebuggerSessionId, DebugProtocolHost> _debugProtocolHosts = [];
+
+	private readonly ILogger<DebuggingService> _logger = logger;
 
 	/// <returns>The debugging session ID</returns>
 	public async Task<DebuggerSessionId> Attach(int debuggeeProcessId, DebuggerExecutableInfo? debuggerExecutableInfo, Dictionary<SharpIdeFile, List<Breakpoint>> breakpointsByFile, SharpIdeProjectModel project, CancellationToken cancellationToken = default)
@@ -23,7 +26,7 @@ public class DebuggingService
 		Guard.Against.NegativeOrZero(debuggeeProcessId, nameof(debuggeeProcessId), "Process ID must be a positive integer.");
 		await Task.CompletedTask.ConfigureAwait(ConfigureAwaitOptions.ForceYielding);
 
-		var (inputStream, outputStream, isNetCoreDbg) = DebuggerProcessStreamHelper.NewDebuggerProcessStreamsForInfo(debuggerExecutableInfo);
+		var (inputStream, outputStream, isNetCoreDbg) = DebuggerProcessStreamHelper.NewDebuggerProcessStreamsForInfo(debuggerExecutableInfo, _logger);
 
 		var debugProtocolHost = new DebugProtocolHost(inputStream, outputStream, false);
 		var initializedEventTcs = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
